@@ -532,7 +532,6 @@ function renderTopbarBadges() {
     setText("userRoleLabel", "Belum Login");
   }
 
-  setText("topModeText", (appState.config.target_mode || "AUTO").toUpperCase());
   updateHeartbeatBadge();
 }
 
