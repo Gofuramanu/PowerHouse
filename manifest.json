@@ -1,13 +1,13 @@
 {
-  "name": "Power House IoT — Monitoring & Control Panel Listrik ESP32",
+  "name": "Power House Panel — IoT Telemetry & Control",
   "short_name": "PowerHouse IoT",
-  "description": "Aplikasi Monitoring Kelistrikan, Suhu Panel, dan Kendali Aktuator ESP32 (Firebase & Supabase)",
+  "description": "Aplikasi Monitoring Kelistrikan, Suhu Panel, dan Kendali Aktuator ESP32",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#090e1a",
-  "theme_color": "#111827",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "./assets/icon-192.png",

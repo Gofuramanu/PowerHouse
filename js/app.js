@@ -195,11 +195,39 @@ function navigateTo(pageKey) {
 }
 
 // ----------------------------------------------------------------------------
-// INISIALISASI GRAFIK CHART.JS
+// INISIALISASI GRAFIK CHART.JS (MONOCHROME DARK & LIGHT THEME)
 // ----------------------------------------------------------------------------
+const THEME_STORAGE_KEY = "powerhouse_theme_v1";
+
+function getCurrentTheme() {
+  return localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+}
+
+function getChartPalette(theme) {
+  if (theme === "light") {
+    return {
+      primary: "#09090b",
+      primaryFill: "rgba(9, 9, 11, 0.08)",
+      secondary: "#6e6e77",
+      tertiary: "#a1a1aa",
+      text: "#52525b",
+      grid: "rgba(0, 0, 0, 0.08)"
+    };
+  }
+  return {
+    primary: "#ffffff",
+    primaryFill: "rgba(255, 255, 255, 0.12)",
+    secondary: "#a1a1aa",
+    tertiary: "#6e6e77",
+    text: "#a1a1aa",
+    grid: "rgba(255, 255, 255, 0.09)"
+  };
+}
+
 function createLineChart(canvasId, datasets, yAxes = {}) {
   const ctx = document.getElementById(canvasId);
   if (!ctx || typeof window.Chart === "undefined") return null;
+  const pal = getChartPalette(getCurrentTheme());
 
   return new window.Chart(ctx, {
     type: "line",
@@ -210,12 +238,12 @@ function createLineChart(canvasId, datasets, yAxes = {}) {
       animation: { duration: 200 },
       interaction: { mode: "index", intersect: false },
       plugins: {
-        legend: { labels: { color: "#cbd5e1", boxWidth: 12 } }
+        legend: { labels: { color: pal.text, boxWidth: 12 } }
       },
       scales: {
         x: {
-          ticks: { color: "#94a3b8", maxTicksLimit: 8 },
-          grid: { color: "rgba(148,163,184,0.1)" }
+          ticks: { color: pal.text, maxTicksLimit: 8 },
+          grid: { color: pal.grid }
         },
         ...yAxes
       }
@@ -225,66 +253,113 @@ function createLineChart(canvasId, datasets, yAxes = {}) {
 
 function initCharts() {
   if (typeof window.Chart === "undefined") return;
+  const pal = getChartPalette(getCurrentTheme());
 
   charts.elPower = createLineChart(
     "electricalPowerChart",
     [
-      { label: "Daya (W)", data: [], borderColor: "#24c48e", backgroundColor: "rgba(36,196,142,0.14)", tension: 0.3, yAxisID: "y" },
-      { label: "Arus (A)", data: [], borderColor: "#00b0ff", tension: 0.3, yAxisID: "y1" }
+      { label: "Daya (W)", data: [], borderColor: pal.primary, backgroundColor: pal.primaryFill, tension: 0.3, yAxisID: "y" },
+      { label: "Arus (A)", data: [], borderColor: pal.secondary, borderDash: [4, 3], tension: 0.3, yAxisID: "y1" }
     ],
     {
-      y: { position: "left", ticks: { color: "#24c48e" }, grid: { color: "rgba(148,163,184,0.08)" } },
-      y1: { position: "right", ticks: { color: "#00b0ff" }, grid: { drawOnChartArea: false } }
+      y: { position: "left", ticks: { color: pal.primary }, grid: { color: pal.grid } },
+      y1: { position: "right", ticks: { color: pal.secondary }, grid: { drawOnChartArea: false } }
     }
   );
 
   charts.elVoltage = createLineChart(
     "electricalVoltageChart",
     [
-      { label: "Tegangan (V)", data: [], borderColor: "#3b82f6", tension: 0.3, yAxisID: "y" },
-      { label: "Power Factor", data: [], borderColor: "#f59e0b", tension: 0.3, yAxisID: "y1" }
+      { label: "Tegangan (V)", data: [], borderColor: pal.primary, tension: 0.3, yAxisID: "y" },
+      { label: "Power Factor", data: [], borderColor: pal.secondary, borderDash: [4, 3], tension: 0.3, yAxisID: "y1" }
     ],
     {
-      y: { position: "left", ticks: { color: "#3b82f6" }, grid: { color: "rgba(148,163,184,0.1)" } },
-      y1: { position: "right", min: 0, max: 1.05, ticks: { color: "#f59e0b" }, grid: { drawOnChartArea: false } }
+      y: { position: "left", ticks: { color: pal.primary }, grid: { color: pal.grid } },
+      y1: { position: "right", min: 0, max: 1.05, ticks: { color: pal.secondary }, grid: { drawOnChartArea: false } }
     }
   );
 
   charts.env = createLineChart(
     "environmentChart",
     [
-      { label: "Suhu Panel (°C)", data: [], borderColor: "#ef4444", tension: 0.3, yAxisID: "y" },
-      { label: "Suhu Udara (°C)", data: [], borderColor: "#f59e0b", tension: 0.3, yAxisID: "y" },
-      { label: "Kelembapan (%)", data: [], borderColor: "#38bdf8", tension: 0.3, yAxisID: "y1" }
+      { label: "Suhu Panel (°C)", data: [], borderColor: pal.primary, tension: 0.3, yAxisID: "y" },
+      { label: "Suhu Udara (°C)", data: [], borderColor: pal.secondary, tension: 0.3, yAxisID: "y" },
+      { label: "Kelembapan (%)", data: [], borderColor: pal.tertiary, borderDash: [3, 3], tension: 0.3, yAxisID: "y1" }
     ],
     {
-      y: { position: "left", ticks: { color: "#fca5a5" }, grid: { color: "rgba(148,163,184,0.1)" } },
-      y1: { position: "right", min: 0, max: 100, ticks: { color: "#38bdf8" }, grid: { drawOnChartArea: false } }
+      y: { position: "left", ticks: { color: pal.primary }, grid: { color: pal.grid } },
+      y1: { position: "right", min: 0, max: 100, ticks: { color: pal.secondary }, grid: { drawOnChartArea: false } }
     }
   );
 
   charts.histPower = createLineChart(
     "historyPowerChart",
     [
-      { label: "Daya (W)", data: [], borderColor: "#10b981", tension: 0.25, yAxisID: "y" },
-      { label: "Arus (A)", data: [], borderColor: "#06b6d4", tension: 0.25, yAxisID: "y1" }
+      { label: "Daya (W)", data: [], borderColor: pal.primary, tension: 0.25, yAxisID: "y" },
+      { label: "Arus (A)", data: [], borderColor: pal.secondary, borderDash: [4, 3], tension: 0.25, yAxisID: "y1" }
     ],
     {
-      y: { position: "left", ticks: { color: "#10b981" }, grid: { color: "rgba(148,163,184,0.1)" } },
-      y1: { position: "right", ticks: { color: "#06b6d4" }, grid: { drawOnChartArea: false } }
+      y: { position: "left", ticks: { color: pal.primary }, grid: { color: pal.grid } },
+      y1: { position: "right", ticks: { color: pal.secondary }, grid: { drawOnChartArea: false } }
     }
   );
 
   charts.histTemp = createLineChart(
     "historyTempChart",
     [
-      { label: "Suhu Panel (°C)", data: [], borderColor: "#ef4444", tension: 0.25, yAxisID: "y" },
-      { label: "Suhu Udara (°C)", data: [], borderColor: "#f59e0b", tension: 0.25, yAxisID: "y" }
+      { label: "Suhu Panel (°C)", data: [], borderColor: pal.primary, tension: 0.25, yAxisID: "y" },
+      { label: "Suhu Udara (°C)", data: [], borderColor: pal.secondary, borderDash: [4, 3], tension: 0.25, yAxisID: "y" }
     ],
     {
-      y: { position: "left", ticks: { color: "#fca5a5" }, grid: { color: "rgba(148,163,184,0.1)" } }
+      y: { position: "left", ticks: { color: pal.primary }, grid: { color: pal.grid } }
     }
   );
+}
+
+function applyTheme(theme) {
+  const next = theme === "light" ? "light" : "dark";
+  localStorage.setItem(THEME_STORAGE_KEY, next);
+  document.documentElement.setAttribute("data-theme", next);
+  document.documentElement.classList.toggle("dark", next === "dark");
+  document.documentElement.classList.toggle("light", next === "light");
+
+  const metaTheme = document.getElementById("metaThemeColor");
+  if (metaTheme) metaTheme.setAttribute("content", next === "light" ? "#ffffff" : "#000000");
+
+  document.getElementById("themeIconSun")?.classList.toggle("hidden", next === "light");
+  document.getElementById("themeIconMoon")?.classList.toggle("hidden", next === "dark");
+
+  const pal = getChartPalette(next);
+  Object.values(charts).forEach((ch) => {
+    if (!ch) return;
+    if (ch.options?.plugins?.legend?.labels) {
+      ch.options.plugins.legend.labels.color = pal.text;
+    }
+    if (ch.options?.scales?.x) {
+      ch.options.scales.x.ticks.color = pal.text;
+      ch.options.scales.x.grid.color = pal.grid;
+    }
+    if (ch.options?.scales?.y) {
+      ch.options.scales.y.ticks.color = pal.primary;
+      ch.options.scales.y.grid.color = pal.grid;
+    }
+    if (ch.options?.scales?.y1) {
+      ch.options.scales.y1.ticks.color = pal.secondary;
+    }
+    if (ch.data?.datasets?.[0]) {
+      ch.data.datasets[0].borderColor = pal.primary;
+      if (ch.data.datasets[0].backgroundColor) {
+        ch.data.datasets[0].backgroundColor = pal.primaryFill;
+      }
+    }
+    if (ch.data?.datasets?.[1]) {
+      ch.data.datasets[1].borderColor = pal.secondary;
+    }
+    if (ch.data?.datasets?.[2]) {
+      ch.data.datasets[2].borderColor = pal.tertiary;
+    }
+    ch.update("none");
+  });
 }
 
 function pushRealtimePoint(t) {
@@ -1422,6 +1497,12 @@ function bindEvents() {
   document.getElementById("btnLogoutSupabase")?.addEventListener("click", async () => {
     if (supabaseClient) await supabaseClient.auth.signOut();
   });
+
+  // Toggle Dark Mode (Full Black) / Light Mode (Clean White)
+  document.getElementById("themeToggleBtn")?.addEventListener("click", () => {
+    const nextTheme = getCurrentTheme() === "dark" ? "light" : "dark";
+    applyTheme(nextTheme);
+  });
 }
 
 // ----------------------------------------------------------------------------
@@ -1508,7 +1589,9 @@ function initPwaSupport() {
 // INISIALISASI SAAT HALAMAN SIAP
 // ----------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
+  applyTheme(getCurrentTheme());
   initCharts();
+  applyTheme(getCurrentTheme());
   bindEvents();
   initPwaSupport();
   startActiveBackend();
