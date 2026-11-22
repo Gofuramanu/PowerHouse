@@ -101,8 +101,7 @@ function formatUptime(totalSec) {
   const sec = Math.max(0, Math.floor(Number(totalSec) || 0));
   const h = Math.floor(sec / 3600);
   const m = Math.floor((sec % 3600) / 60);
-  const s = sec % 60;
-  return `${h}j ${m}m ${s}d`;
+  return `${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m`;
 }
 
 function formatTime(isoStr) {
@@ -147,15 +146,15 @@ function canUserControl() {
 // ----------------------------------------------------------------------------
 const PAGE_META = {
   overview: {
-    title: "Overview Sistem",
+    title: "Power House Panel",
     subtitle: "Ringkasan kondisi kelistrikan, termal panel, koneksi ESP32, dan status aktuator"
   },
   electrical: {
-    title: "Electrical Monitoring",
+    title: "Electrical Telemetry",
     subtitle: "Parameter detail tegangan, arus, daya aktif, energi, frekuensi, dan faktor daya"
   },
   environment: {
-    title: "Environment Monitoring",
+    title: "Environment",
     subtitle: "Pemantauan suhu internal panel (DS18B20), suhu udara (DHT22), dan kelembapan"
   },
   control: {
@@ -167,7 +166,7 @@ const PAGE_META = {
     subtitle: "Analisis tren historis, kalkulasi energi periode, audit aktivitas, dan export CSV"
   },
   settings: {
-    title: "Settings & Konfigurasi",
+    title: "System Settings",
     subtitle: "Konfigurasi backend, ambang batas suhu, autentikasi pengguna, dan uji simulasi"
   }
 };
@@ -339,33 +338,37 @@ function renderAll() {
   setText("sidebarDeviceId", appState.settings.deviceId);
   renderTopbarBadges();
 
-  // --- HALAMAN 1: OVERVIEW ---
-  setText("ovWifiStatus", t.wifi_connected ? "TERHUBUNG" : "TERPUTUS");
+  // --- HALAMAN 1: OVERVIEW (LUMEN TELEMETRY / BLYNK STYLE) ---
+  setText("ovWifiStatus", t.wifi_connected ? "Connected" : "Offline");
+  const wifiDot = document.getElementById("ovWifiDot");
+  if (wifiDot) wifiDot.className = "led-pip " + (t.wifi_connected ? "green" : "red");
+
   setText("ovLastSeen", "Update: " + formatTime(t.last_seen_at));
-  setText("ovMode", t.actual_mode);
-  setText("ovModeHint", t.actual_mode === "AUTO" ? "Kendali otomatis suhu" : "Kendali manual operator");
+  setText("ovMode", `Mode: ${t.actual_mode}`);
+  setText("ovModeHint", `Threshold ${formatNum(c.temp_threshold_alarm, 0)}°C`);
   setText("ovUptime", formatUptime(t.uptime_seconds));
 
   const deltaT = (Number(t.temp_panel) || 0) - (Number(t.temp_air) || 0);
-  setText("ovThermalDelta", `ΔT Panel-Udara: ${deltaT >= 0 ? "+" : ""}${deltaT.toFixed(1)} °C`);
-  const thermalHealth =
-    t.temp_panel >= c.temp_threshold_alarm
-      ? "KRITIS (OVERHEAT)"
-      : t.temp_panel >= c.temp_threshold_ac
-        ? "HANGAT"
-        : "AMAN";
+  setText("ovThermalDelta", `${deltaT >= 0 ? "+" : ""}${deltaT.toFixed(1)} °C`);
+  const isOverheat = t.temp_panel >= c.temp_threshold_alarm;
+  const isWarm = t.temp_panel >= c.temp_threshold_ac;
+  const thermalHealth = isOverheat ? "Critical" : isWarm ? "Warm" : "Safe";
   setText("ovThermalHealth", thermalHealth);
+  const thermalDot = document.getElementById("ovThermalDot");
+  if (thermalDot) {
+    thermalDot.className = "led-pip " + (isOverheat ? "red" : isWarm ? "amber" : "green");
+  }
 
   setText("ovVoltage", formatNum(t.voltage, 1));
   setText("ovCurrent", formatNum(t.current, 2));
   setText("ovPower", formatNum(t.power, 0));
-  setText("ovEnergy", formatNum(t.energy, 3));
+  setText("ovEnergy", formatNum(t.energy, 1));
   setText("ovFrequency", formatNum(t.frequency, 1));
   setText("ovPf", formatNum(t.power_factor, 2));
 
-  setText("ovTempPanel", `${formatNum(t.temp_panel, 1)} °C`);
-  setText("ovTempAir", `${formatNum(t.temp_air, 1)} °C`);
-  setText("ovHumidity", `${formatNum(t.humidity, 1)} %`);
+  setText("ovTempPanel", formatNum(t.temp_panel, 1));
+  setText("ovTempAir", formatNum(t.temp_air, 1));
+  setText("ovHumidity", formatNum(t.humidity, 1));
 
   setStateBadge("ovFanBadge", t.actual_fan);
   setStateBadge("ovAcBadge", t.actual_ac);
@@ -375,24 +378,29 @@ function renderAll() {
   // --- HALAMAN 2: ELECTRICAL ---
   const v = Number(t.voltage) || 0;
   const i = Number(t.current) || 0;
+  const p = Number(t.power) || 0;
   const pf = Number(t.power_factor) || 0;
   const freq = Number(t.frequency) || 0;
   const kwh = Number(t.energy) || 0;
+  const loadPct = Math.min(100, Math.max(0, (p / 3500) * 100));
 
   setText("elVoltage", formatNum(v, 1));
   setText("elCurrent", formatNum(i, 2));
-  setText("elApparentPower", formatNum(v * i, 0));
-  setText("elPower", formatNum(t.power, 0));
-  setText("elEnergy", formatNum(kwh, 3));
+  setText("elApparentPower", `${formatNum(v * i, 0)} VA`);
+  setText("elPower", formatNum(p, 0));
+  setText("elLoadPct", `${loadPct.toFixed(1)}% BEBAN`);
+  const loadBar = document.getElementById("elLoadBar");
+  if (loadBar) loadBar.style.width = `${Math.max(4, loadPct)}%`;
+  setText("elEnergy", formatNum(kwh, 2));
   setText("elFrequency", formatNum(freq, 1));
   setText("elPf", formatNum(pf, 2));
   setText("elEstCost", "Rp " + Math.round(kwh * 1445).toLocaleString("id-ID"));
 
   if (v === 0) setQualityTag("elVoltageQuality", "0 V / Padam", "warn");
   else if (v >= 207 && v <= 242) setQualityTag("elVoltageQuality", "Normal", "good");
-  else setQualityTag("elVoltageQuality", "Tegangan Abnormal", "bad");
+  else setQualityTag("elVoltageQuality", "Abnormal", "bad");
 
-  if (freq === 0) setQualityTag("elFreqQuality", "Tidak Terbaca", "warn");
+  if (freq === 0) setQualityTag("elFreqQuality", "0 Hz", "warn");
   else if (freq >= 49.5 && freq <= 50.5) setQualityTag("elFreqQuality", "Stabil", "good");
   else setQualityTag("elFreqQuality", "Deviasi", "warn");
 
@@ -402,10 +410,14 @@ function renderAll() {
 
   // --- HALAMAN 3: ENVIRONMENT ---
   const tp = Number(t.temp_panel) || 0;
+  const ta = Number(t.temp_air) || 0;
   const hum = Number(t.humidity) || 0;
+  const dewPoint = ta - (100 - hum) / 5;
+
   setText("envTempPanel", formatNum(tp, 1));
-  setText("envTempAir", formatNum(t.temp_air, 1));
+  setText("envTempAir", formatNum(ta, 1));
   setText("envHumidity", formatNum(hum, 1));
+  setText("envDewPoint", formatNum(dewPoint, 1));
   setText("envDeltaTemp", `${deltaT >= 0 ? "+" : ""}${deltaT.toFixed(1)}`);
   setText("envThFan", formatNum(c.temp_threshold_fan, 1));
   setText("envThAc", formatNum(c.temp_threshold_ac, 1));
@@ -445,22 +457,24 @@ function renderTopbarBadges() {
     setText("userRoleLabel", "Belum Login");
   }
 
+  setText("topModeText", `${(appState.config.target_mode || "AUTO").toUpperCase()}\nMODE`);
   updateHeartbeatBadge();
 }
 
 function updateHeartbeatBadge() {
   const badge = document.getElementById("heartbeatBadge");
+  const textEl = document.getElementById("heartbeatText");
   if (!badge) return;
 
   const lastMs = new Date(appState.telemetry.last_seen_at).getTime();
   const ageSec = Number.isFinite(lastMs) ? Math.max(0, Math.floor((Date.now() - lastMs) / 1000)) : 9999;
 
   if (ageSec <= 15 && appState.telemetry.wifi_connected) {
-    badge.className = "pill pill-online";
-    badge.textContent = `ESP32: ONLINE (${ageSec}d lalu)`;
+    badge.className = "blynk-status-pill online";
+    if (textEl) textEl.textContent = "ESP32 ONLINE";
   } else {
-    badge.className = "pill pill-offline";
-    badge.textContent = ageSec > 3600 ? "ESP32: OFFLINE" : `ESP32: OFFLINE (${ageSec}d lalu)`;
+    badge.className = "blynk-status-pill offline";
+    if (textEl) textEl.textContent = "ESP32 OFFLINE";
   }
 }
 
@@ -496,30 +510,37 @@ function renderControlPage() {
 
   document.getElementById("controlGuardBanner")?.classList.toggle("hidden", allowed);
 
-  const btnAuto = document.getElementById("btnModeAuto");
-  const btnManual = document.getElementById("btnModeManual");
-  if (btnAuto && btnManual) {
-    btnAuto.classList.toggle("active", !isManual);
-    btnManual.classList.toggle("active", isManual);
-    btnAuto.disabled = !allowed;
-    btnManual.disabled = !allowed;
-  }
+  const modeButtons = [
+    [document.getElementById("btnModeAuto"), document.getElementById("btnModeManual")],
+    [document.getElementById("ovBtnModeAuto"), document.getElementById("ovBtnModeManual")]
+  ];
+  modeButtons.forEach(([bAuto, bMan]) => {
+    if (bAuto && bMan) {
+      bAuto.classList.toggle("active", !isManual);
+      bMan.classList.toggle("active", isManual);
+      bAuto.disabled = !allowed;
+      bMan.disabled = !allowed;
+    }
+  });
 
   const isFirebase = appState.settings.mode === "firebase";
 
   const bindings = [
-    { input: "ctrlFan", targetText: "targetFanText", actualText: "actualFanText", targetVal: c.target_fan, actualVal: t.actual_fan, locked: !isManual },
-    { input: "ctrlAc", targetText: "targetAcText", actualText: "actualAcText", targetVal: c.target_ac, actualVal: t.actual_ac, locked: !isManual },
-    { input: "ctrlBuzzer", targetText: "targetBuzzerText", actualText: "actualBuzzerText", targetVal: t.actual_buzzer, actualVal: t.actual_buzzer, locked: true, customTarget: `AUTO (≥${c.temp_threshold_alarm}°C)` },
-    { input: "ctrlLamp", targetText: "targetLampText", actualText: "actualLampText", targetVal: isFirebase ? t.actual_lamp : c.target_lamp, actualVal: t.actual_lamp, locked: isFirebase, customTarget: isFirebase ? "AUTO (Fan/AC)" : null }
+    { inputs: ["ctrlFan", "ovCtrlFan"], targetText: "targetFanText", actualText: "actualFanText", targetVal: c.target_fan, actualVal: t.actual_fan, locked: !isManual },
+    { inputs: ["ctrlAc", "ovCtrlAc"], targetText: "targetAcText", actualText: "actualAcText", targetVal: c.target_ac, actualVal: t.actual_ac, locked: !isManual },
+    { inputs: ["ctrlBuzzer", "ovCtrlBuzzer"], targetText: "targetBuzzerText", actualText: "actualBuzzerText", targetVal: t.actual_buzzer, actualVal: t.actual_buzzer, locked: true, customTarget: `AUTO (≥${c.temp_threshold_alarm}°C)` },
+    { inputs: ["ctrlLamp", "ovCtrlLamp"], targetText: "targetLampText", actualText: "actualLampText", targetVal: isFirebase ? t.actual_lamp : c.target_lamp, actualVal: t.actual_lamp, locked: isFirebase, customTarget: isFirebase ? "AUTO (Fan/AC)" : null }
   ];
 
   bindings.forEach((b) => {
-    const inp = document.getElementById(b.input);
-    if (inp) {
-      inp.checked = Boolean(b.targetVal);
-      inp.disabled = !allowed || b.locked;
-    }
+    const shownState = isManual ? Boolean(b.targetVal) : Boolean(b.actualVal);
+    b.inputs.forEach((inputId) => {
+      const inp = document.getElementById(inputId);
+      if (inp) {
+        inp.checked = shownState;
+        inp.disabled = !allowed || b.locked;
+      }
+    });
     setText(b.targetText, b.customTarget || (b.targetVal ? "ON" : "OFF"));
     setText(b.actualText, b.actualVal ? "ON" : "OFF");
   });
@@ -528,16 +549,10 @@ function renderControlPage() {
     c.target_mode === t.actual_mode &&
     (!isManual || (c.target_fan === t.actual_fan && c.target_ac === t.actual_ac));
 
-  const acWaitHint =
-    isManual && c.target_ac && !t.actual_ac
-      ? " (Catatan: AC memiliki proteksi jeda restart kompresor 180 detik di ESP32)"
-      : "";
-
-  setText(
+  setQualityTag(
     "syncStatusNote",
-    inSync
-      ? "Status sinkronisasi perintah: Tersinkronisasi dengan ESP32"
-      : "Status sinkronisasi perintah: Menunggu konfirmasi dari ESP32..." + acWaitHint
+    inSync ? "TERSINKRONISASI" : "MENUNGGU ESP32...",
+    inSync ? "good" : "warn"
   );
 }
 
@@ -1281,25 +1296,37 @@ function bindEvents() {
     document.getElementById("sidebarBackdrop")?.classList.remove("show");
   });
 
-  // Kontrol Mode & Aktuator (Halaman 4)
-  document.getElementById("btnModeAuto")?.addEventListener("click", () => {
-    updateControlConfig({ target_mode: "AUTO" }, "Mode diubah ke AUTO");
+  // Kontrol Mode & Aktuator (Halaman 1 Quick Control & Halaman 4 Device Control)
+  ["btnModeAuto", "ovBtnModeAuto"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("click", () => {
+      updateControlConfig({ target_mode: "AUTO" }, "Mode diubah ke AUTO");
+    });
   });
-  document.getElementById("btnModeManual")?.addEventListener("click", () => {
-    updateControlConfig({ target_mode: "MANUAL" }, "Mode diubah ke MANUAL");
+  ["btnModeManual", "ovBtnModeManual"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("click", () => {
+      updateControlConfig({ target_mode: "MANUAL" }, "Mode diubah ke MANUAL");
+    });
   });
 
-  document.getElementById("ctrlFan")?.addEventListener("change", (e) => {
-    updateControlConfig({ target_fan: e.target.checked }, `Kipas disetel ${e.target.checked ? "ON" : "OFF"}`);
+  ["ctrlFan", "ovCtrlFan"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("change", (e) => {
+      updateControlConfig({ target_fan: e.target.checked }, `Kipas disetel ${e.target.checked ? "ON" : "OFF"}`);
+    });
   });
-  document.getElementById("ctrlAc")?.addEventListener("change", (e) => {
-    updateControlConfig({ target_ac: e.target.checked }, `AC Split disetel ${e.target.checked ? "ON" : "OFF"}`);
+  ["ctrlAc", "ovCtrlAc"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("change", (e) => {
+      updateControlConfig({ target_ac: e.target.checked }, `AC Split disetel ${e.target.checked ? "ON" : "OFF"}`);
+    });
   });
-  document.getElementById("ctrlBuzzer")?.addEventListener("change", (e) => {
-    updateControlConfig({ target_buzzer: e.target.checked }, `Buzzer disetel ${e.target.checked ? "ON" : "OFF"}`);
+  ["ctrlBuzzer", "ovCtrlBuzzer"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("change", (e) => {
+      updateControlConfig({ target_buzzer: e.target.checked }, `Buzzer disetel ${e.target.checked ? "ON" : "OFF"}`);
+    });
   });
-  document.getElementById("ctrlLamp")?.addEventListener("change", (e) => {
-    updateControlConfig({ target_lamp: e.target.checked }, `Lampu disetel ${e.target.checked ? "ON" : "OFF"}`);
+  ["ctrlLamp", "ovCtrlLamp"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("change", (e) => {
+      updateControlConfig({ target_lamp: e.target.checked }, `Lampu disetel ${e.target.checked ? "ON" : "OFF"}`);
+    });
   });
 
   // Halaman 5: Filter Histori & Export

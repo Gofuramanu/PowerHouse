@@ -1,24 +1,27 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#12161f">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b101b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Power House IoT — Monitoring &amp; Control Panel Listrik ESP32</title>
+  <title>Power House Panel — IoT Telemetry &amp; Control</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./assets/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
-    <!-- Sidebar Backdrop (Mobile) -->
+    <!-- Sidebar Backdrop (Tablet/Desktop Drawer) -->
     <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
 
-    <!-- SIDEBAR NAVIGATION (DESKTOP & DRAWER) -->
+    <!-- SIDEBAR NAVIGATION (DESKTOP) -->
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-brand">
         <div class="brand-logo" aria-hidden="true">
@@ -27,31 +30,31 @@
           </svg>
         </div>
         <div>
-          <h1>POWER HOUSE</h1>
-          <span>IoT Panel Telemetry</span>
+          <h1>Power House Panel</h1>
+          <span>Luminescent Telemetry</span>
         </div>
       </div>
 
-      <nav class="sidebar-nav" aria-label="Navigasi Dashboard">
+      <nav class="sidebar-nav" aria-label="Navigasi Utama">
         <button class="nav-item active" data-page="overview" type="button">
-          <svg class="nav-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect></svg>
+          <svg class="nav-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"></rect><line x1="12" y1="3" x2="12" y2="21"></line></svg>
           <span>Overview</span>
         </button>
         <button class="nav-item" data-page="electrical" type="button">
           <svg class="nav-svg" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-          <span>Electrical Monitoring</span>
+          <span>Electrical Telemetry</span>
         </button>
         <button class="nav-item" data-page="environment" type="button">
           <svg class="nav-svg" viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></svg>
-          <span>Environment Monitoring</span>
+          <span>Environment</span>
         </button>
         <button class="nav-item" data-page="control" type="button">
           <svg class="nav-svg" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
           <span>Device Control</span>
         </button>
         <button class="nav-item" data-page="history" type="button">
-          <svg class="nav-svg" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-          <span>History &amp; Analytics</span>
+          <svg class="nav-svg" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>
+          <span>History &amp; Logs</span>
         </button>
         <button class="nav-item" data-page="settings" type="button">
           <svg class="nav-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -61,21 +64,27 @@
 
       <div class="sidebar-footer">
         <div class="device-chip">
-          <span class="chip-label">Perangkat Aktif</span>
+          <span class="chip-label">NODE ID</span>
           <strong id="sidebarDeviceId">panel-utama-01</strong>
         </div>
+        <div class="sidebar-meta-row">
+          <span id="backendBadge" class="meta-chip">Firebase RTDB</span>
+          <button id="authActionBtn" class="meta-chip clickable" type="button">
+            <span id="userRoleLabel">Operator</span>
+          </button>
+        </div>
         <a href="./firebase-legacy-test.html" class="legacy-link" target="_blank" rel="noopener">
-          Diagnostik Firebase RTDB
+          Raw RTDB Diagnostic
         </a>
       </div>
     </aside>
 
     <!-- MAIN WORKSPACE -->
     <div class="main-area">
-      <!-- TOPBAR (BLYNK APP HEADER) -->
-      <header class="topbar">
-        <div class="topbar-main-row">
-          <div class="topbar-left">
+      <!-- BLYNK-STYLE TOP APP HEADER (MATCHING SCREENSHOT) -->
+      <header class="blynk-header">
+        <div class="blynk-header-inner">
+          <div class="header-title-wrap">
             <button id="menuToggleBtn" class="menu-toggle" type="button" aria-label="Buka Menu">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -83,20 +92,40 @@
                 <line x1="3" y1="18" x2="21" y2="18"></line>
               </svg>
             </button>
-            <div>
-              <h2 id="pageTitle">Overview Sistem</h2>
-              <p id="pageSubtitle" class="topbar-subtitle">Ringkasan kondisi kelistrikan, termal panel, koneksi ESP32, dan status aktuator</p>
+            <div class="brand-title-stack">
+              <h2 id="pageTitle" class="brand-main-title">Power House<br>Panel</h2>
+              <p id="pageSubtitle" class="topbar-subtitle hidden">Luminescent Telemetry System</p>
             </div>
           </div>
 
-          <div class="topbar-badges">
-            <span id="heartbeatBadge" class="pill pill-offline">ESP32: Menunggu</span>
-            <span id="backendBadge" class="pill pill-info">Mode: Firebase Legacy</span>
-            <button id="authActionBtn" class="pill pill-auth" type="button">
-              <span id="userRoleLabel">Operator</span>
+          <div class="header-pills-right">
+            <!-- Status Pill: ESP32 ONLINE -->
+            <div id="heartbeatBadge" class="blynk-status-pill online">
+              <span class="led-pip"></span>
+              <span id="heartbeatText">ESP32<br>ONLINE</span>
+            </div>
+
+            <!-- Mode Circle/Pill: AUTO MODE -->
+            <button id="topModePill" class="blynk-mode-pill" type="button" data-goto="control" title="Ubah Mode Kendali">
+              <span id="topModeText">AUTO<br>MODE</span>
             </button>
-            <button id="installAppBtn" class="pill pill-install" type="button">
-              Install Aplikasi
+
+            <!-- Install App Button (Always visible on Web Browser) -->
+            <button id="installAppBtn" class="blynk-install-btn" type="button" title="Pasang Aplikasi ke HP">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Install</span>
+            </button>
+
+            <!-- Settings Gear Button -->
+            <button id="headerSettingsBtn" class="blynk-gear-btn" type="button" data-goto="settings" aria-label="Pengaturan">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
             </button>
           </div>
         </div>
@@ -108,233 +137,502 @@
         <div id="alertBannerText">Peringatan Sistem</div>
       </div>
 
-      <!-- PAGE CONTAINER -->
+      <!-- MAIN PAGE CONTAINER -->
       <main class="content">
-        <!-- ==================== HALAMAN 1: OVERVIEW ==================== -->
+        <!-- ==================== HALAMAN 1: OVERVIEW (100% MATCH SCREENSHOT) ==================== -->
         <section id="page-overview" class="page active">
-          <div class="status-strip">
-            <div class="strip-item">
-              <span class="strip-label">Koneksi ESP32</span>
-              <strong id="ovWifiStatus">--</strong>
-              <small id="ovLastSeen">Update: --</small>
+          <!-- 1. System Health Strip (2x2 Compact Grid with Left Icon) -->
+          <div class="health-grid-2x2">
+            <!-- WiFi Status -->
+            <div class="health-tile">
+              <div class="health-icon-wrap">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                  <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                  <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                </svg>
+              </div>
+              <div class="health-info">
+                <span class="micro-slug">WIFI STATUS</span>
+                <div class="health-val-row">
+                  <span id="ovWifiDot" class="led-pip green"></span>
+                  <strong id="ovWifiStatus">Connected</strong>
+                </div>
+                <small id="ovLastSeen" class="micro-sub">Update: --</small>
+              </div>
             </div>
-            <div class="strip-item">
-              <span class="strip-label">Mode Operasi</span>
-              <strong id="ovMode">--</strong>
-              <small id="ovModeHint">Sinkronisasi kontrol</small>
+
+            <!-- Uptime -->
+            <div class="health-tile">
+              <div class="health-icon-wrap">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <div class="health-info">
+                <span class="micro-slug">UPTIME</span>
+                <div class="health-val-row">
+                  <strong id="ovUptime">00h 00m</strong>
+                </div>
+                <small id="ovMode" class="micro-sub">AUTO</small>
+              </div>
             </div>
-            <div class="strip-item">
-              <span class="strip-label">Waktu Operasi</span>
-              <strong id="ovUptime">--</strong>
-              <small>Uptime perangkat</small>
+
+            <!-- Thermal Status -->
+            <div class="health-tile">
+              <div class="health-icon-wrap">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </div>
+              <div class="health-info">
+                <span class="micro-slug">THERMAL STATUS</span>
+                <div class="health-val-row">
+                  <span id="ovThermalDot" class="led-pip green"></span>
+                  <strong id="ovThermalHealth">Safe</strong>
+                </div>
+                <small id="ovModeHint" class="micro-sub">Threshold 40°C</small>
+              </div>
             </div>
-            <div class="strip-item">
-              <span class="strip-label">Status Termal</span>
-              <strong id="ovThermalHealth">--</strong>
-              <small id="ovThermalDelta">Delta Panel-Udara: --</small>
+
+            <!-- Thermal Delta -->
+            <div class="health-tile">
+              <div class="health-icon-wrap amber">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+              </div>
+              <div class="health-info">
+                <span class="micro-slug">THERMAL DELTA</span>
+                <div class="health-val-row">
+                  <strong id="ovThermalDelta" class="text-amber">+0.0 °C</strong>
+                </div>
+                <small class="micro-sub">Panel vs Ambient</small>
+              </div>
             </div>
           </div>
 
-          <h3 class="section-heading">Telemetry Kelistrikan</h3>
-          <div class="grid-cards cols-3">
-            <div class="metric-card accent-blue">
-              <span class="metric-label">Tegangan (Voltage)</span>
-              <div class="metric-value"><span id="ovVoltage">--</span> <small>V</small></div>
-              <span class="metric-foot">Tegangan AC</span>
+          <!-- 2. ENVIRONMENT SECTION (3-Column Horizontal Cards) -->
+          <div class="section-label-row">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+            </svg>
+            <span>ENVIRONMENT</span>
+          </div>
+
+          <div class="env-trio-grid">
+            <!-- Panel Temp (DS18B20) -->
+            <div class="env-trio-card">
+              <div class="env-trio-top">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
+                </svg>
+              </div>
+              <div class="env-trio-val">
+                <span id="ovTempPanel">--</span><small>°C</small>
+              </div>
+              <span class="env-trio-foot">DS18B20</span>
             </div>
-            <div class="metric-card accent-cyan">
-              <span class="metric-label">Arus Beban (Current)</span>
-              <div class="metric-value"><span id="ovCurrent">--</span> <small>A</small></div>
-              <span class="metric-foot">Arus beban panel</span>
+
+            <!-- Air Temp (DHT22) -->
+            <div class="env-trio-card">
+              <div class="env-trio-top">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path>
+                </svg>
+                <span class="led-pip amber"></span>
+              </div>
+              <div class="env-trio-val text-amber">
+                <span id="ovTempAir">--</span><small>°C</small>
+              </div>
+              <span class="env-trio-foot">DHT22</span>
             </div>
-            <div class="metric-card accent-emerald">
-              <span class="metric-label">Daya Aktif (Power)</span>
-              <div class="metric-value"><span id="ovPower">--</span> <small>W</small></div>
-              <span class="metric-foot">Daya sesaat</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-label">Energi Terpakai</span>
-              <div class="metric-value"><span id="ovEnergy">--</span> <small>kWh</small></div>
-              <span class="metric-foot">Akumulasi kWh</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-label">Frekuensi</span>
-              <div class="metric-value"><span id="ovFrequency">--</span> <small>Hz</small></div>
-              <span class="metric-foot">Standar 50 Hz</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-label">Power Factor</span>
-              <div class="metric-value"><span id="ovPf">--</span> <small>Cos phi</small></div>
-              <span class="metric-foot">Efisiensi daya</span>
+
+            <!-- Humidity -->
+            <div class="env-trio-card">
+              <div class="env-trio-top">
+                <svg class="text-cyan" viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                </svg>
+              </div>
+              <div class="env-trio-val text-cyan">
+                <span id="ovHumidity">--</span><small>%</small>
+              </div>
+              <span class="env-trio-foot">RELATIVE</span>
             </div>
           </div>
 
-          <div class="two-col-layout">
-            <div class="panel-box">
-              <h3 class="box-title">Lingkungan Panel</h3>
-              <div class="env-mini-grid">
-                <div class="env-mini">
-                  <span>Suhu Panel</span>
-                  <strong id="ovTempPanel">-- °C</strong>
-                </div>
-                <div class="env-mini">
-                  <span>Suhu Udara</span>
-                  <strong id="ovTempAir">-- °C</strong>
-                </div>
-                <div class="env-mini">
-                  <span>Kelembapan</span>
-                  <strong id="ovHumidity">-- %</strong>
-                </div>
-              </div>
+          <!-- 3. ELECTRICAL TELEMETRY (2x3 Grid with Glowing Bottom Bars) -->
+          <div class="section-label-row">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span>ELECTRICAL TELEMETRY</span>
+          </div>
 
-              <h3 class="box-title" style="margin-top: 18px;">Status Output Aktuator</h3>
-              <div class="actuator-pills">
-                <div class="actuator-pill">
-                  <span>Kipas Panel</span>
-                  <span id="ovFanBadge" class="state-badge off">OFF</span>
-                </div>
-                <div class="actuator-pill">
-                  <span>AC Split</span>
-                  <span id="ovAcBadge" class="state-badge off">OFF</span>
-                </div>
-                <div class="actuator-pill">
-                  <span>Buzzer Alarm</span>
-                  <span id="ovBuzzerBadge" class="state-badge off">OFF</span>
-                </div>
-                <div class="actuator-pill">
-                  <span>Lampu Indikator</span>
-                  <span id="ovLampBadge" class="state-badge off">OFF</span>
-                </div>
+          <div class="telemetry-grid-2x3">
+            <!-- Voltage -->
+            <div class="blynk-metric-tile glow-blue">
+              <div class="tile-head">
+                <span class="micro-slug">VOLTAGE</span>
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 12l3.5-3.5"></path></svg>
+              </div>
+              <div class="tile-reading">
+                <span id="ovVoltage">--</span>
+                <small>V</small>
               </div>
             </div>
 
-            <div class="panel-box">
-              <div class="box-header-row">
-                <h3 class="box-title">Log Aktivitas</h3>
-                <button class="btn-link" data-goto="history" type="button">Lihat Semua</button>
+            <!-- Current -->
+            <div class="blynk-metric-tile glow-cyan">
+              <div class="tile-head">
+                <span class="micro-slug">CURRENT</span>
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
               </div>
-              <ul id="overviewActivityList" class="activity-feed">
-                <li class="empty-note">Menunggu data aktivitas sistem...</li>
-              </ul>
+              <div class="tile-reading">
+                <span id="ovCurrent">--</span>
+                <small>A</small>
+              </div>
             </div>
+
+            <!-- Active Power -->
+            <div class="blynk-metric-tile glow-green">
+              <div class="tile-head">
+                <span class="micro-slug">ACTIVE POWER</span>
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              </div>
+              <div class="tile-reading">
+                <span id="ovPower">--</span>
+                <small>W</small>
+              </div>
+            </div>
+
+            <!-- Energy -->
+            <div class="blynk-metric-tile glow-cyan">
+              <div class="tile-head">
+                <span class="micro-slug">ENERGY</span>
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"></rect><line x1="22" y1="11" x2="22" y2="13"></line></svg>
+              </div>
+              <div class="tile-reading">
+                <span id="ovEnergy">--</span>
+                <small>kWh</small>
+              </div>
+            </div>
+
+            <!-- Frequency -->
+            <div class="blynk-metric-tile glow-cyan">
+              <div class="tile-head">
+                <span class="micro-slug">FREQUENCY</span>
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h4l3-8 6 16 3-8h4"></path></svg>
+              </div>
+              <div class="tile-reading">
+                <span id="ovFrequency">--</span>
+                <small>Hz</small>
+              </div>
+            </div>
+
+            <!-- Power Factor -->
+            <div class="blynk-metric-tile glow-cyan">
+              <div class="tile-head">
+                <span class="micro-slug">POWER FACTOR</span>
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 3 3 21 21 21"></polyline><polyline points="7 14 12 9 16 13 21 8"></polyline></svg>
+              </div>
+              <div class="tile-reading">
+                <span id="ovPf">--</span>
+                <small>Cos φ</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. QUICK CONTROL SECTION (Segmented AUTO/MANUAL + 2x2 Actuator Tiles) -->
+          <div class="section-label-row">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+            <span>QUICK CONTROL</span>
+          </div>
+
+          <!-- Segmented Pill Switch: AUTO vs MANUAL -->
+          <div class="blynk-segmented-pill">
+            <button id="ovBtnModeAuto" class="seg-pill-btn active" type="button">AUTO</button>
+            <button id="ovBtnModeManual" class="seg-pill-btn" type="button">MANUAL</button>
+          </div>
+
+          <!-- 2x2 Actuator Control Cards (Matching Screenshot) -->
+          <div class="quick-actuators-2x2">
+            <!-- Panel Cooling Fan -->
+            <div class="quick-actuator-card">
+              <div class="qa-top">
+                <svg class="qa-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 12c0-3 2.5-5.5 5.5-5.5S23 9 23 12H12zm0 0c3 0 5.5 2.5 5.5 5.5S15 23 12 23V12zm0 0c0 3-2.5 5.5-5.5 5.5S1 15 1 12h11zm0 0c-3 0-5.5-2.5-5.5-5.5S9 1 12 1v11z"></path>
+                </svg>
+                <label class="switch" aria-label="Toggle Panel Cooling Fan">
+                  <input type="checkbox" id="ovCtrlFan">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="qa-title">Panel Cooling Fan</div>
+              <div class="qa-status">
+                <span id="ovFanBadge" class="state-badge off">OFF</span>
+              </div>
+            </div>
+
+            <!-- Split AC Unit -->
+            <div class="quick-actuator-card">
+              <div class="qa-top">
+                <svg class="qa-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="2" x2="12" y2="22"></line>
+                  <path d="M20 16l-4-4 4-4"></path>
+                  <path d="M4 8l4 4-4 4"></path>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M16 4l-4 4-4-4"></path>
+                  <path d="M8 20l4-4 4 4"></path>
+                </svg>
+                <label class="switch" aria-label="Toggle Split AC Unit">
+                  <input type="checkbox" id="ovCtrlAc">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="qa-title">Split AC Unit</div>
+              <div class="qa-status">
+                <span id="ovAcBadge" class="state-badge off">OFF</span>
+              </div>
+            </div>
+
+            <!-- Overheat Buzzer -->
+            <div class="quick-actuator-card">
+              <div class="qa-top">
+                <svg class="qa-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <label class="switch" aria-label="Overheat Buzzer Status">
+                  <input type="checkbox" id="ovCtrlBuzzer">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="qa-title">Overheat Buzzer</div>
+              <div class="qa-status">
+                <span id="ovBuzzerBadge" class="state-badge off">OFF</span>
+              </div>
+            </div>
+
+            <!-- Load Indicator Lamp -->
+            <div class="quick-actuator-card">
+              <div class="qa-top">
+                <svg class="qa-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 18h6"></path>
+                  <path d="M10 22h4"></path>
+                  <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path>
+                </svg>
+                <label class="switch" aria-label="Load Indicator Lamp">
+                  <input type="checkbox" id="ovCtrlLamp">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="qa-title">Load Indicator Lamp</div>
+              <div class="qa-status">
+                <span id="ovLampBadge" class="state-badge off">OFF</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Recent Activity Terminal Feed -->
+          <div class="panel-box terminal-box" style="margin-top: 16px;">
+            <div class="box-header-row">
+              <span class="micro-slug">RECENT TELEMETRY LOGS</span>
+              <button class="btn-link" data-goto="history" type="button">View All</button>
+            </div>
+            <ul id="overviewActivityList" class="activity-feed">
+              <li class="empty-note">Waiting for telemetry stream...</li>
+            </ul>
           </div>
         </section>
 
-        <!-- ==================== HALAMAN 2: ELECTRICAL MONITORING ==================== -->
+        <!-- ==================== HALAMAN 2: ELECTRICAL MONITORING (STITCH DESIGN) ==================== -->
         <section id="page-electrical" class="page">
-          <div class="grid-cards cols-3">
-            <div class="metric-card accent-blue">
-              <div class="card-top-row">
-                <span class="metric-label">Tegangan Listrik</span>
-                <span id="elVoltageQuality" class="quality-tag">--</span>
+          <!-- Hero Active Power Gauge Card -->
+          <div class="panel-box hero-power-card">
+            <div class="hero-power-top">
+              <div>
+                <span class="micro-slug">DAYA AKTIF SESAAT (PZEM-004T)</span>
+                <div class="hero-power-reading">
+                  <span id="elPower">--</span>
+                  <small>W</small>
+                </div>
               </div>
-              <div class="metric-value"><span id="elVoltage">--</span> <small>V</small></div>
-              <span class="metric-foot">Rentang normal: 207V – 242V</span>
+              <div class="hero-power-meta-right">
+                <span id="elLoadPct" class="quality-tag good">LIVE LOAD</span>
+                <small class="micro-sub">Kapasitas 3500 W</small>
+              </div>
             </div>
 
-            <div class="metric-card accent-cyan">
-              <div class="card-top-row">
-                <span class="metric-label">Arus Listrik</span>
-                <span class="quality-tag neutral">PZEM-004T</span>
-              </div>
-              <div class="metric-value"><span id="elCurrent">--</span> <small>A</small></div>
-              <span class="metric-foot">Daya Semu: <strong id="elApparentPower">--</strong> VA</span>
+            <div class="progress-rail">
+              <div id="elLoadBar" class="progress-fill" style="width: 28%;"></div>
             </div>
 
-            <div class="metric-card accent-emerald">
-              <div class="card-top-row">
-                <span class="metric-label">Daya Aktif</span>
-                <span class="quality-tag neutral">Live</span>
+            <div class="power-sub-grid">
+              <div class="sub-box">
+                <span class="micro-slug">DAYA SEMU (VA)</span>
+                <strong id="elApparentPower">-- VA</strong>
               </div>
-              <div class="metric-value"><span id="elPower">--</span> <small>W</small></div>
-              <span class="metric-foot">Energi: <strong id="elEnergy">--</strong> kWh</span>
-            </div>
-
-            <div class="metric-card">
-              <div class="card-top-row">
-                <span class="metric-label">Frekuensi Jaringan</span>
-                <span id="elFreqQuality" class="quality-tag">--</span>
+              <div class="sub-box">
+                <span class="micro-slug">ESTIMASI BIAYA</span>
+                <strong id="elEstCost">Rp --</strong>
               </div>
-              <div class="metric-value"><span id="elFrequency">--</span> <small>Hz</small></div>
-              <span class="metric-foot">Toleransi: 49.5 – 50.5 Hz</span>
-            </div>
-
-            <div class="metric-card">
-              <div class="card-top-row">
-                <span class="metric-label">Power Factor</span>
-                <span id="elPfQuality" class="quality-tag">--</span>
-              </div>
-              <div class="metric-value"><span id="elPf">--</span></div>
-              <span class="metric-foot">Target efisiensi &ge; 0.85</span>
-            </div>
-
-            <div class="metric-card">
-              <div class="card-top-row">
-                <span class="metric-label">Estimasi Biaya</span>
-                <span class="quality-tag neutral">Rp 1.445/kWh</span>
-              </div>
-              <div class="metric-value"><span id="elEstCost">Rp --</span></div>
-              <span class="metric-foot">Akumulasi energi terbaca</span>
             </div>
           </div>
 
+          <!-- Real-Time Dual Wave Charts -->
           <div class="two-col-layout">
             <div class="panel-box chart-box">
-              <h3 class="box-title">Grafik Real-Time Daya (W) &amp; Arus (A)</h3>
+              <h3 class="box-title">Tren Daya (W) &amp; Arus (A) Real-Time</h3>
               <div class="chart-wrapper">
                 <canvas id="electricalPowerChart"></canvas>
               </div>
             </div>
             <div class="panel-box chart-box">
-              <h3 class="box-title">Grafik Real-Time Tegangan (V) &amp; Power Factor</h3>
+              <h3 class="box-title">Tren Tegangan (V) &amp; Power Factor</h3>
               <div class="chart-wrapper">
                 <canvas id="electricalVoltageChart"></canvas>
               </div>
             </div>
           </div>
+
+          <!-- 2x3 Detailed Electrical Cards -->
+          <div class="telemetry-grid-2x3" style="margin-top: 14px;">
+            <div class="blynk-metric-tile glow-blue">
+              <div class="tile-head">
+                <span class="micro-slug">TEGANGAN</span>
+                <span id="elVoltageQuality" class="quality-tag">--</span>
+              </div>
+              <div class="tile-reading">
+                <span id="elVoltage">--</span> <small>V</small>
+              </div>
+              <span class="micro-sub">Standar PLN: 207V – 242V</span>
+            </div>
+
+            <div class="blynk-metric-tile glow-cyan">
+              <div class="tile-head">
+                <span class="micro-slug">ARUS BEBAN</span>
+                <span class="quality-tag neutral">CT 100A</span>
+              </div>
+              <div class="tile-reading">
+                <span id="elCurrent">--</span> <small>A</small>
+              </div>
+              <span class="micro-sub">Sensor PZEM-004T v3.0</span>
+            </div>
+
+            <div class="blynk-metric-tile glow-green">
+              <div class="tile-head">
+                <span class="micro-slug">ENERGI TOTAL</span>
+                <span class="quality-tag good">AKUMULASI</span>
+              </div>
+              <div class="tile-reading">
+                <span id="elEnergy">--</span> <small>kWh</small>
+              </div>
+              <span class="micro-sub">Tarif ~Rp 1.445 / kWh</span>
+            </div>
+
+            <div class="blynk-metric-tile glow-cyan">
+              <div class="tile-head">
+                <span class="micro-slug">FREKUENSI</span>
+                <span id="elFreqQuality" class="quality-tag">--</span>
+              </div>
+              <div class="tile-reading">
+                <span id="elFrequency">--</span> <small>Hz</small>
+              </div>
+              <span class="micro-sub">Toleransi: 49.5 – 50.5 Hz</span>
+            </div>
+
+            <div class="blynk-metric-tile glow-cyan">
+              <div class="tile-head">
+                <span class="micro-slug">POWER FACTOR</span>
+                <span id="elPfQuality" class="quality-tag">--</span>
+              </div>
+              <div class="tile-reading">
+                <span id="elPf">--</span> <small>Cos φ</small>
+              </div>
+              <span class="micro-sub">Target Efisiensi &ge; 0.85</span>
+            </div>
+
+            <div class="blynk-metric-tile glow-green">
+              <div class="tile-head">
+                <span class="micro-slug">INTERFACE</span>
+                <span class="quality-tag good">UART2</span>
+              </div>
+              <div class="tile-reading">
+                <span>GPIO 16/17</span>
+              </div>
+              <span class="micro-sub">Modbus-RTU 9600 bps</span>
+            </div>
+          </div>
         </section>
 
-        <!-- ==================== HALAMAN 3: ENVIRONMENT MONITORING ==================== -->
+        <!-- ==================== HALAMAN 3: ENVIRONMENT MONITORING (STITCH DESIGN) ==================== -->
         <section id="page-environment" class="page">
-          <div class="grid-cards cols-4">
-            <div class="metric-card accent-emerald">
-              <div class="card-top-row">
-                <span class="metric-label">Suhu Panel (DS18B20)</span>
-                <span id="envPanelZone" class="quality-tag">--</span>
-              </div>
-              <div class="metric-value"><span id="envTempPanel">--</span> <small>&deg;C</small></div>
-              <span class="metric-foot">Kipas: <strong id="envThFan">30</strong>&deg;C | Alarm: <strong id="envThAlarm">40</strong>&deg;C</span>
+          <div class="panel-box">
+            <div class="box-header-row">
+              <span class="micro-slug">STATUS TERMAL PANEL &amp; AMBIENT</span>
+              <span id="envPanelZone" class="quality-tag good">SAFE ZONE</span>
             </div>
 
-            <div class="metric-card accent-blue">
-              <div class="card-top-row">
-                <span class="metric-label">Suhu Udara (DHT22)</span>
-                <span class="quality-tag neutral">Ambient</span>
+            <div class="env-hero-split">
+              <div class="env-hero-box">
+                <span class="micro-slug">PANEL INTERNAL (DS18B20)</span>
+                <div class="tile-reading">
+                  <span id="envTempPanel">--</span> <small>°C</small>
+                </div>
+                <span class="micro-sub">Kipas ON &ge; <strong id="envThFan">30</strong>°C</span>
               </div>
-              <div class="metric-value"><span id="envTempAir">--</span> <small>&deg;C</small></div>
-              <span class="metric-foot">AC Split: <strong id="envThAc">35</strong>&deg;C</span>
+
+              <div class="env-hero-box">
+                <span class="micro-slug">UDARA AMBIENT (DHT22)</span>
+                <div class="tile-reading text-amber">
+                  <span id="envTempAir">--</span> <small>°C</small>
+                </div>
+                <span class="micro-sub">AC Split ON &ge; <strong id="envThAc">35</strong>°C</span>
+              </div>
             </div>
 
-            <div class="metric-card accent-cyan">
-              <div class="card-top-row">
-                <span class="metric-label">Kelembapan Udara</span>
-                <span id="envHumidityZone" class="quality-tag">--</span>
+            <div class="env-delta-strip">
+              <div class="box-header-row">
+                <span class="micro-slug">DELTA TERMAL (PANEL - UDARA)</span>
+                <strong class="text-amber"><span id="envDeltaTemp">--</span> °C</strong>
               </div>
-              <div class="metric-value"><span id="envHumidity">--</span> <small>%</small></div>
-              <span class="metric-foot">Rentang ideal: 40% – 70%</span>
-            </div>
-
-            <div class="metric-card">
-              <div class="card-top-row">
-                <span class="metric-label">Selisih Termal</span>
-                <span class="quality-tag neutral">Panel - Udara</span>
-              </div>
-              <div class="metric-value"><span id="envDeltaTemp">--</span> <small>&deg;C</small></div>
-              <span class="metric-foot">Indikator panas internal</span>
+              <span class="micro-sub">Ambang Alarm Overheat Darurat: <strong id="envThAlarm">40</strong>°C</span>
             </div>
           </div>
 
-          <div class="panel-box chart-box" style="margin-top: 16px;">
+          <div class="telemetry-grid-2x3" style="margin-top: 14px;">
+            <div class="blynk-metric-tile glow-cyan">
+              <div class="tile-head">
+                <span class="micro-slug">KELEMBAPAN RELATIF</span>
+                <span id="envHumidityZone" class="quality-tag">--</span>
+              </div>
+              <div class="tile-reading text-cyan">
+                <span id="envHumidity">--</span> <small>%</small>
+              </div>
+              <span class="micro-sub">Rentang ideal: 40% – 70%</span>
+            </div>
+
+            <div class="blynk-metric-tile glow-green">
+              <div class="tile-head">
+                <span class="micro-slug">TITIK EMBUN (DEW POINT)</span>
+                <span class="quality-tag neutral">KALKULASI</span>
+              </div>
+              <div class="tile-reading">
+                <span id="envDewPoint">--</span> <small>°C</small>
+              </div>
+              <span class="micro-sub">Proteksi kondensasi panel</span>
+            </div>
+          </div>
+
+          <div class="panel-box chart-box" style="margin-top: 14px;">
             <h3 class="box-title">Tren Suhu Panel, Suhu Udara &amp; Kelembapan</h3>
             <div class="chart-wrapper tall">
               <canvas id="environmentChart"></canvas>
@@ -342,32 +640,39 @@
           </div>
         </section>
 
-        <!-- ==================== HALAMAN 4: DEVICE CONTROL ==================== -->
+        <!-- ==================== HALAMAN 4: DEVICE CONTROL (STITCH DESIGN) ==================== -->
         <section id="page-control" class="page">
           <div id="controlGuardBanner" class="info-banner hidden">
-            <strong>Mode Read-Only:</strong> Akun Anda berstatus <em>Viewer</em> atau belum login sebagai Admin/Operator. Tombol kontrol dikunci.
+            <strong>Mode Read-Only:</strong> Akun Anda berstatus <em>Viewer</em>. Login sebagai Admin/Operator untuk mengirim perintah kontrol.
           </div>
 
-          <div class="panel-box control-mode-card">
-            <div>
-              <h3>Mode Kendali Sistem</h3>
-              <p class="muted-text">
-                <strong>AUTO:</strong> ESP32 mengendalikan Kipas dan AC otomatis berdasarkan suhu panel.<br>
-                <strong>MANUAL:</strong> Kendali langsung Kipas dan AC melalui switch di bawah.
-              </p>
+          <div class="panel-box">
+            <div class="box-header-row" style="margin-bottom: 10px;">
+              <span class="micro-slug">LOGIKA KENDALI SISTEM</span>
+              <span id="syncStatusNote" class="quality-tag good">TERSINKRONISASI</span>
             </div>
-            <div class="mode-switch-group">
-              <button id="btnModeAuto" class="mode-btn active" type="button">AUTO</button>
-              <button id="btnModeManual" class="mode-btn" type="button">MANUAL</button>
+
+            <div class="blynk-segmented-pill" style="margin-bottom: 12px;">
+              <button id="btnModeAuto" class="seg-pill-btn active" type="button">AUTO (ESP32)</button>
+              <button id="btnModeManual" class="seg-pill-btn" type="button">MANUAL RTDB</button>
             </div>
+
+            <p class="muted-text">
+              <strong>AUTO:</strong> Histeresis termal berjalan di ESP32 (Kipas ON &ge;30°C / OFF &le;28°C, AC ON &ge;35°C / OFF &le;32°C, Buzzer &ge;40°C).<br>
+              <strong>MANUAL:</strong> Kendali langsung relai Kipas dan AC melalui switch di bawah.
+            </p>
           </div>
 
-          <div class="grid-cards cols-2" style="margin-top: 16px;">
+          <div class="grid-cards cols-2" style="margin-top: 14px;">
+            <!-- Card 1: Kipas Exhaust Panel (GPIO 25) -->
             <div class="control-card">
               <div class="control-head">
                 <div>
-                  <h4>Kipas Pendingin Panel (GPIO 25)</h4>
-                  <p>AUTO: ON &ge; 30&deg;C, OFF &le; 28&deg;C &bull; MANUAL: <code>/panel/control/fan</code></p>
+                  <div class="ctrl-title-row">
+                    <h4>Kipas Exhaust Panel</h4>
+                    <span class="gpio-chip">GPIO 25</span>
+                  </div>
+                  <p>TRIGGER: ACTIVE-LOW &bull; ON &ge;30°C / OFF &le;28°C</p>
                 </div>
                 <label class="switch" aria-label="Kontrol Kipas">
                   <input type="checkbox" id="ctrlFan">
@@ -375,16 +680,20 @@
                 </label>
               </div>
               <div class="control-sync-meta">
-                <span>Target: <strong id="targetFanText">--</strong></span>
-                <span>Aktual ESP32: <strong id="actualFanText">--</strong></span>
+                <span>TARGET: <strong id="targetFanText">--</strong></span>
+                <span>AKTUAL ESP32: <strong id="actualFanText">--</strong></span>
               </div>
             </div>
 
+            <!-- Card 2: AC Split (GPIO 26) -->
             <div class="control-card">
               <div class="control-head">
                 <div>
-                  <h4>AC Split Power House (GPIO 26)</h4>
-                  <p>AUTO: ON &ge; 35&deg;C, OFF &le; 32&deg;C &bull; Jeda proteksi kompresor 180 detik</p>
+                  <div class="ctrl-title-row">
+                    <h4>AC Ruang Panel</h4>
+                    <span class="gpio-chip cyan">GPIO 26</span>
+                  </div>
+                  <p>COMPRESSOR GUARD: 180s DELAY &bull; ON &ge;35°C / OFF &le;32°C</p>
                 </div>
                 <label class="switch" aria-label="Kontrol AC Split">
                   <input type="checkbox" id="ctrlAc">
@@ -392,16 +701,20 @@
                 </label>
               </div>
               <div class="control-sync-meta">
-                <span>Target: <strong id="targetAcText">--</strong></span>
-                <span>Aktual ESP32: <strong id="actualAcText">--</strong></span>
+                <span>TARGET: <strong id="targetAcText">--</strong></span>
+                <span>AKTUAL ESP32: <strong id="actualAcText">--</strong></span>
               </div>
             </div>
 
+            <!-- Card 3: Buzzer Alarm (GPIO 27) -->
             <div class="control-card">
               <div class="control-head">
                 <div>
-                  <h4>Buzzer Alarm Overheat (GPIO 27)</h4>
-                  <p>Aktif otomatis (Transistor BC547 Active-HIGH) saat suhu panel &ge; 40&deg;C</p>
+                  <div class="ctrl-title-row">
+                    <h4>Buzzer Alarm Darurat</h4>
+                    <span class="gpio-chip red">GPIO 27</span>
+                  </div>
+                  <p>DRIVER: BC547 ACTIVE-HIGH &bull; TRIP OTOMATIS &ge;40°C</p>
                 </div>
                 <label class="switch" aria-label="Status Buzzer">
                   <input type="checkbox" id="ctrlBuzzer">
@@ -409,16 +722,20 @@
                 </label>
               </div>
               <div class="control-sync-meta">
-                <span>Mode: <strong id="targetBuzzerText">--</strong></span>
-                <span>Aktual ESP32: <strong id="actualBuzzerText">--</strong></span>
+                <span>LOGIKA: <strong id="targetBuzzerText">--</strong></span>
+                <span>AKTUAL ESP32: <strong id="actualBuzzerText">--</strong></span>
               </div>
             </div>
 
+            <!-- Card 4: Lampu Indikator (GPIO 14) -->
             <div class="control-card">
               <div class="control-head">
                 <div>
-                  <h4>Lampu Indikator Beban (GPIO 14)</h4>
-                  <p>Menyala otomatis (Active-HIGH) saat Kipas atau AC sedang beroperasi</p>
+                  <div class="ctrl-title-row">
+                    <h4>Lampu Indikator Beban</h4>
+                    <span class="gpio-chip amber">GPIO 14</span>
+                  </div>
+                  <p>DRIVER: ACTIVE-HIGH &bull; MENYALA SAAT KIPAS ATAU AC AKTIF</p>
                 </div>
                 <label class="switch" aria-label="Status Lampu Indikator">
                   <input type="checkbox" id="ctrlLamp">
@@ -426,14 +743,10 @@
                 </label>
               </div>
               <div class="control-sync-meta">
-                <span>Mode: <strong id="targetLampText">--</strong></span>
-                <span>Aktual ESP32: <strong id="actualLampText">--</strong></span>
+                <span>LOGIKA: <strong id="targetLampText">--</strong></span>
+                <span>AKTUAL ESP32: <strong id="actualLampText">--</strong></span>
               </div>
             </div>
-          </div>
-
-          <div id="syncStatusNote" class="sync-note">
-            Status sinkronisasi perintah: Siap
           </div>
         </section>
 
@@ -442,7 +755,7 @@
           <div class="panel-box filter-bar">
             <div class="filter-controls">
               <div class="field-inline">
-                <label for="historyRangeSelect">Rentang Waktu</label>
+                <label for="historyRangeSelect">RENTANG WAKTU</label>
                 <select id="historyRangeSelect">
                   <option value="1h">1 Jam Terakhir</option>
                   <option value="24h" selected>24 Jam Terakhir</option>
@@ -464,22 +777,22 @@
             <button id="btnExportCsv" class="btn-secondary" type="button">Export CSV</button>
           </div>
 
-          <div class="grid-cards cols-4" style="margin-top: 14px;">
-            <div class="metric-card">
-              <span class="metric-label">Daya Puncak</span>
-              <div class="metric-value"><span id="histPeakPower">--</span> <small>W</small></div>
+          <div class="health-grid-2x2" style="margin-top: 14px;">
+            <div class="blynk-metric-tile glow-green">
+              <span class="micro-slug">DAYA PUNCAK</span>
+              <div class="tile-reading"><span id="histPeakPower">--</span> <small>W</small></div>
             </div>
-            <div class="metric-card">
-              <span class="metric-label">Rata-rata Suhu Panel</span>
-              <div class="metric-value"><span id="histAvgTemp">--</span> <small>&deg;C</small></div>
+            <div class="blynk-metric-tile glow-blue">
+              <span class="micro-slug">RATA-RATA SUHU PANEL</span>
+              <div class="tile-reading"><span id="histAvgTemp">--</span> <small>°C</small></div>
             </div>
-            <div class="metric-card">
-              <span class="metric-label">Konsumsi Energi</span>
-              <div class="metric-value"><span id="histDeltaEnergy">--</span> <small>kWh</small></div>
+            <div class="blynk-metric-tile glow-cyan">
+              <span class="micro-slug">KONSUMSI ENERGI</span>
+              <div class="tile-reading"><span id="histDeltaEnergy">--</span> <small>kWh</small></div>
             </div>
-            <div class="metric-card">
-              <span class="metric-label">Rata-rata PF</span>
-              <div class="metric-value"><span id="histAvgPf">--</span></div>
+            <div class="blynk-metric-tile glow-cyan">
+              <span class="micro-slug">RATA-RATA PF</span>
+              <div class="tile-reading"><span id="histAvgPf">--</span></div>
             </div>
           </div>
 
@@ -498,8 +811,8 @@
             </div>
           </div>
 
-          <div class="panel-box" style="margin-top: 16px;">
-            <h3 class="box-title">Riwayat Aktivitas Perangkat</h3>
+          <div class="panel-box" style="margin-top: 14px;">
+            <h3 class="box-title">Audit Trail &amp; Log Aktivitas</h3>
             <div class="table-scroll">
               <table class="data-table">
                 <thead>
@@ -527,7 +840,7 @@
             <form id="backendConfigForm" class="panel-box form-card">
               <h3 class="box-title">Koneksi Backend &amp; Sumber Data</h3>
               <p class="muted-text" style="margin-bottom: 14px;">
-                Pilih sumber data aktif. Secara default terhubung ke Firebase milik ESP32 Anda.
+                Secara default aplikasi langsung tersinkronisasi dengan Firebase RTDB milik ESP32 Anda.
               </p>
 
               <div class="form-group">
@@ -602,7 +915,7 @@
             </form>
           </div>
 
-          <div class="panel-box" style="margin-top: 16px;">
+          <div class="panel-box" style="margin-top: 14px;">
             <div class="box-header-row">
               <div>
                 <h3 class="box-title">Sesi Pengguna &amp; Hak Akses</h3>
@@ -629,31 +942,27 @@
     </div>
   </div>
 
-  <!-- NAVIGASI BAWAH KHUSUS HP (BLYNK MOBILE TAB BAR) -->
-  <nav id="mobileBottomNav" class="mobile-bottom-nav" aria-label="Navigasi Cepat HP">
+  <!-- BLYNK MOBILE BOTTOM NAVIGATION BAR (5 TABS MATCHING SCREENSHOT) -->
+  <nav id="mobileBottomNav" class="mobile-bottom-nav" aria-label="Navigasi Utama HP">
     <button class="mob-nav-item active" data-page="overview" type="button">
-      <svg class="mob-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect></svg>
-      <span>Overview</span>
+      <svg class="mob-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"></rect><line x1="12" y1="3" x2="12" y2="21"></line></svg>
+      <span>OVERVIEW</span>
     </button>
     <button class="mob-nav-item" data-page="electrical" type="button">
       <svg class="mob-svg" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-      <span>Listrik</span>
+      <span>ELECTRIC</span>
     </button>
     <button class="mob-nav-item" data-page="environment" type="button">
       <svg class="mob-svg" viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></svg>
-      <span>Suhu</span>
+      <span>ENV</span>
     </button>
     <button class="mob-nav-item" data-page="control" type="button">
       <svg class="mob-svg" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
-      <span>Kontrol</span>
+      <span>CONTROL</span>
     </button>
     <button class="mob-nav-item" data-page="history" type="button">
-      <svg class="mob-svg" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-      <span>Histori</span>
-    </button>
-    <button class="mob-nav-item" data-page="settings" type="button">
-      <svg class="mob-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-      <span>Settings</span>
+      <svg class="mob-svg" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>
+      <span>HISTORY</span>
     </button>
   </nav>
 
@@ -671,7 +980,7 @@
 
         <div class="install-step-box">
           <strong>Opsi 1: Buka di Google Chrome (Android)</strong>
-          <p>Pindahkan halaman ke Google Chrome lalu ketuk tombol <b>Install Aplikasi</b>:</p>
+          <p>Pindahkan halaman ke Google Chrome lalu ketuk tombol <b>Install</b>:</p>
           <button id="btnOpenInChrome" class="btn-primary" type="button" style="width: 100%; margin-top: 8px;">
             Buka di Google Chrome
           </button>

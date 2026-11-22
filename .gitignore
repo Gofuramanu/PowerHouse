@@ -5,6 +5,7 @@
 js/config.js
 esp32/panel_iot_controller/config.h
 Kendali_akuisisi.ino
+stitch_blynk_style_iot_dashboard_redesign/
 
 # Build & editor artifacts
 node_modules/
