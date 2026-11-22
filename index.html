@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111827">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Power House IoT — Monitoring &amp; Control Panel Listrik ESP32</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./assets/icon.svg">
   <link rel="stylesheet" href="./css/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
 </head>
@@ -73,10 +79,13 @@
         </div>
 
         <div class="topbar-badges">
-          <span id="backendBadge" class="pill pill-info">Mode: Simulasi Interaktif</span>
+          <button id="installAppBtn" class="pill pill-info hidden" type="button">
+            📲 Install Aplikasi
+          </button>
+          <span id="backendBadge" class="pill pill-info">Mode: Firebase ESP32</span>
           <span id="heartbeatBadge" class="pill pill-offline">● ESP32: Menunggu</span>
           <button id="authActionBtn" class="pill pill-auth" type="button">
-            👤 <span id="userRoleLabel">Demo Admin</span>
+            👤 <span id="userRoleLabel">Operator</span>
           </button>
         </div>
       </header>
@@ -345,8 +354,8 @@
             <div class="control-card">
               <div class="control-head">
                 <div>
-                  <h4>🌀 Kipas Pendingin Panel</h4>
-                  <p>Sirkulasi udara di dalam enclosure panel listrik</p>
+                  <h4>🌀 Kipas Pendingin Panel (GPIO 25)</h4>
+                  <p>AUTO: ON &ge; 30&deg;C, OFF &le; 28&deg;C &bull; MANUAL: Kendali via <code>/panel/control/fan</code></p>
                 </div>
                 <label class="switch">
                   <input type="checkbox" id="ctrlFan">
@@ -362,8 +371,8 @@
             <div class="control-card">
               <div class="control-head">
                 <div>
-                  <h4>❄️ AC Split Power House</h4>
-                  <p>Pendinginan ruang utama ketika suhu tinggi</p>
+                  <h4>❄️ AC Split Power House (GPIO 26)</h4>
+                  <p>AUTO: ON &ge; 35&deg;C, OFF &le; 32&deg;C &bull; Proteksi jeda restart kompresor 180 detik</p>
                 </div>
                 <label class="switch">
                   <input type="checkbox" id="ctrlAc">
@@ -379,8 +388,8 @@
             <div class="control-card">
               <div class="control-head">
                 <div>
-                  <h4>🔔 Buzzer Alarm</h4>
-                  <p>Peringatan suara lokal di panel saat kondisi darurat</p>
+                  <h4>🔔 Buzzer Alarm Overheat (GPIO 27)</h4>
+                  <p>Aktif otomatis (Transistor BC547 Active-HIGH) saat suhu panel &ge; 40&deg;C</p>
                 </div>
                 <label class="switch">
                   <input type="checkbox" id="ctrlBuzzer">
@@ -396,8 +405,8 @@
             <div class="control-card">
               <div class="control-head">
                 <div>
-                  <h4>💡 Lampu Penerangan Panel</h4>
-                  <p>Dapat dikontrol kapan saja saat inspeksi atau malam hari</p>
+                  <h4>💡 Lampu Indikator Beban (GPIO 14)</h4>
+                  <p>Menyala otomatis (Active-HIGH) saat Kipas atau AC sedang beroperasi</p>
                 </div>
                 <label class="switch">
                   <input type="checkbox" id="ctrlLamp">
@@ -556,18 +565,18 @@
               </p>
 
               <div class="form-group">
-                <label for="cfgThFan">Ambang Suhu Kipas ON (&deg;C)</label>
-                <input type="number" step="0.5" min="15" max="80" id="cfgThFan" value="32">
+                <label for="cfgThFan">Ambang Suhu Kipas ON (&deg;C) — OFF pada 28&deg;C</label>
+                <input type="number" step="0.5" min="15" max="80" id="cfgThFan" value="30">
               </div>
 
               <div class="form-group">
-                <label for="cfgThAc">Ambang Suhu AC Split ON (&deg;C)</label>
+                <label for="cfgThAc">Ambang Suhu AC Split ON (&deg;C) — OFF pada 32&deg;C</label>
                 <input type="number" step="0.5" min="15" max="85" id="cfgThAc" value="35">
               </div>
 
               <div class="form-group">
                 <label for="cfgThAlarm">Ambang Suhu Alarm Overheat (&deg;C)</label>
-                <input type="number" step="0.5" min="20" max="100" id="cfgThAlarm" value="45">
+                <input type="number" step="0.5" min="20" max="100" id="cfgThAlarm" value="40">
               </div>
 
               <div class="form-group">

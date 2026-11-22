@@ -107,9 +107,9 @@ CREATE TABLE IF NOT EXISTS public.panel_config (
   target_ac BOOLEAN NOT NULL DEFAULT FALSE,
   target_buzzer BOOLEAN NOT NULL DEFAULT FALSE,
   target_lamp BOOLEAN NOT NULL DEFAULT FALSE,
-  temp_threshold_fan DOUBLE PRECISION NOT NULL DEFAULT 32.0 CHECK (temp_threshold_fan BETWEEN 15 AND 80),
+  temp_threshold_fan DOUBLE PRECISION NOT NULL DEFAULT 30.0 CHECK (temp_threshold_fan BETWEEN 15 AND 80),
   temp_threshold_ac DOUBLE PRECISION NOT NULL DEFAULT 35.0 CHECK (temp_threshold_ac BETWEEN 15 AND 85),
-  temp_threshold_alarm DOUBLE PRECISION NOT NULL DEFAULT 45.0 CHECK (temp_threshold_alarm BETWEEN 20 AND 100),
+  temp_threshold_alarm DOUBLE PRECISION NOT NULL DEFAULT 40.0 CHECK (temp_threshold_alarm BETWEEN 20 AND 100),
   log_interval_seconds INTEGER NOT NULL DEFAULT 60 CHECK (log_interval_seconds BETWEEN 5 AND 3600),
   updated_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

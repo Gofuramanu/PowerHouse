@@ -8,14 +8,15 @@
  * ============================================================================
  */
 
-const STORAGE_KEY = "powerhouse_dashboard_settings_v1";
+const STORAGE_KEY = "powerhouse_dashboard_settings_v2";
 const MAX_REALTIME_POINTS = 25;
 
 // ----------------------------------------------------------------------------
 // STATE APLIKASI TERPUSAT
 // ----------------------------------------------------------------------------
 const defaultSettings = {
-  mode: window.APP_CONFIG?.mode || "simulator",
+  // Default 'firebase' agar langsung sinkron dengan Kendali_akuisisi.ino milik teman
+  mode: window.APP_CONFIG?.mode || "firebase",
   supabaseUrl: window.APP_CONFIG?.supabase?.url || "",
   supabaseAnonKey: window.APP_CONFIG?.supabase?.anonKey || "",
   deviceId: window.APP_CONFIG?.supabase?.deviceId || "panel-utama-01",
@@ -31,7 +32,7 @@ const appState = {
   settings: loadSettings(),
   activePage: "overview",
   user: null,
-  role: "admin", // Pada mode simulator default admin; pada Supabase mengikuti user_roles
+  role: "admin", // Pada mode simulator/firebase default admin; pada Supabase mengikuti user_roles
   telemetry: {
     voltage: 221.4,
     current: 4.82,
@@ -40,7 +41,7 @@ const appState = {
     frequency: 50.0,
     power_factor: 0.94,
     temp_air: 29.4,
-    temp_panel: 30.8,
+    temp_panel: 28.5,
     humidity: 62.5,
     actual_mode: "AUTO",
     actual_fan: false,
@@ -57,9 +58,9 @@ const appState = {
     target_ac: false,
     target_buzzer: false,
     target_lamp: false,
-    temp_threshold_fan: 32.0,
+    temp_threshold_fan: 30.0,
     temp_threshold_ac: 35.0,
-    temp_threshold_alarm: 45.0,
+    temp_threshold_alarm: 40.0,
     log_interval_seconds: 60
   },
   realtimeSeries: [],
@@ -504,36 +505,39 @@ function renderControlPage() {
     btnManual.disabled = !allowed;
   }
 
+  const isFirebase = appState.settings.mode === "firebase";
+
   const bindings = [
-    { input: "ctrlFan", targetText: "targetFanText", actualText: "actualFanText", targetVal: c.target_fan, actualVal: t.actual_fan, autoLocked: true },
-    { input: "ctrlAc", targetText: "targetAcText", actualText: "actualAcText", targetVal: c.target_ac, actualVal: t.actual_ac, autoLocked: true },
-    { input: "ctrlBuzzer", targetText: "targetBuzzerText", actualText: "actualBuzzerText", targetVal: c.target_buzzer, actualVal: t.actual_buzzer, autoLocked: true },
-    { input: "ctrlLamp", targetText: "targetLampText", actualText: "actualLampText", targetVal: c.target_lamp, actualVal: t.actual_lamp, autoLocked: false }
+    { input: "ctrlFan", targetText: "targetFanText", actualText: "actualFanText", targetVal: c.target_fan, actualVal: t.actual_fan, locked: !isManual },
+    { input: "ctrlAc", targetText: "targetAcText", actualText: "actualAcText", targetVal: c.target_ac, actualVal: t.actual_ac, locked: !isManual },
+    { input: "ctrlBuzzer", targetText: "targetBuzzerText", actualText: "actualBuzzerText", targetVal: t.actual_buzzer, actualVal: t.actual_buzzer, locked: true, customTarget: `AUTO (≥${c.temp_threshold_alarm}°C)` },
+    { input: "ctrlLamp", targetText: "targetLampText", actualText: "actualLampText", targetVal: isFirebase ? t.actual_lamp : c.target_lamp, actualVal: t.actual_lamp, locked: isFirebase, customTarget: isFirebase ? "AUTO (Fan/AC)" : null }
   ];
 
   bindings.forEach((b) => {
     const inp = document.getElementById(b.input);
     if (inp) {
       inp.checked = Boolean(b.targetVal);
-      inp.disabled = !allowed || (b.autoLocked && !isManual);
+      inp.disabled = !allowed || b.locked;
     }
-    setText(b.targetText, b.targetVal ? "ON" : "OFF");
+    setText(b.targetText, b.customTarget || (b.targetVal ? "ON" : "OFF"));
     setText(b.actualText, b.actualVal ? "ON" : "OFF");
   });
 
   const inSync =
     c.target_mode === t.actual_mode &&
-    (!isManual ||
-      (c.target_fan === t.actual_fan &&
-        c.target_ac === t.actual_ac &&
-        c.target_buzzer === t.actual_buzzer)) &&
-    c.target_lamp === t.actual_lamp;
+    (!isManual || (c.target_fan === t.actual_fan && c.target_ac === t.actual_ac));
+
+  const acWaitHint =
+    isManual && c.target_ac && !t.actual_ac
+      ? " (Catatan: AC memiliki proteksi jeda restart kompresor 180 detik di ESP32)"
+      : "";
 
   setText(
     "syncStatusNote",
     inSync
       ? "Status sinkronisasi perintah: Tersinkronisasi dengan ESP32"
-      : "Status sinkronisasi perintah: Menunggu konfirmasi dari ESP32..."
+      : "Status sinkronisasi perintah: Menunggu konfirmasi dari ESP32..." + acWaitHint
   );
 }
 
@@ -730,27 +734,27 @@ function evaluateSimulatorPhysics(dtSec) {
 
   if (c.target_mode === "AUTO") {
     t.actual_mode = "AUTO";
+    // Histeresis sesuai Kendali_akuisisi.ino: Fan ON >= 30, OFF <= 28; AC ON >= 35, OFF <= 32
     if (t.temp_panel >= c.temp_threshold_fan) t.actual_fan = true;
-    else if (t.temp_panel <= c.temp_threshold_fan - 1.5) t.actual_fan = false;
+    else if (t.temp_panel <= c.temp_threshold_fan - 2.0) t.actual_fan = false;
 
     if (t.temp_panel >= c.temp_threshold_ac) t.actual_ac = true;
-    else if (t.temp_panel <= c.temp_threshold_ac - 1.5) t.actual_ac = false;
+    else if (t.temp_panel <= c.temp_threshold_ac - 3.0) t.actual_ac = false;
 
     t.actual_buzzer = t.temp_panel >= c.temp_threshold_alarm;
-    t.actual_lamp = c.target_lamp;
+    t.actual_lamp = t.actual_fan || t.actual_ac || c.target_lamp;
   } else {
     t.actual_mode = "MANUAL";
     t.actual_fan = c.target_fan;
     t.actual_ac = c.target_ac;
-    t.actual_buzzer = c.target_buzzer;
-    t.actual_lamp = c.target_lamp;
 
-    // Fail-safe overheat override di mode manual
+    // Fail-safe overheat override & alarm otomatis sesuai Kendali_akuisisi.ino
     if (t.temp_panel >= c.temp_threshold_alarm) {
       t.actual_fan = true;
       t.actual_ac = true;
-      t.actual_buzzer = true;
     }
+    t.actual_buzzer = t.temp_panel >= c.temp_threshold_alarm;
+    t.actual_lamp = t.actual_fan || t.actual_ac || c.target_lamp;
   }
 
   if (prevFan !== t.actual_fan || prevAc !== t.actual_ac || prevBuzzer !== t.actual_buzzer) {
@@ -934,7 +938,7 @@ function unsubscribeSupabaseRealtime() {
 }
 
 // ----------------------------------------------------------------------------
-// MODE 3: FIREBASE LEGACY RTDB BRIDGE (SDK v10.14.1)
+// MODE 3: FIREBASE RTDB — SINKRON LANGSUNG DENGAN KENDALI_AKUISISI.INO
 // ----------------------------------------------------------------------------
 async function startFirebaseMode() {
   stopActiveConnections();
@@ -966,13 +970,32 @@ async function startFirebaseMode() {
 
     await signInAnonymously(auth);
     const telemetryRef = ref(db, "panel/telemetry");
+    const controlRef = ref(db, "panel/control");
+    let hasControlNode = false;
 
-    const unsub = onValue(telemetryRef, (snapshot) => {
+    // 1. Dengarkan node /panel/control (tempat Kendali_akuisisi.ino membaca mode, fan, ac)
+    const unsubControl = onValue(controlRef, (snapshot) => {
+      const ctrl = snapshot.val();
+      if (!ctrl) return;
+      hasControlNode = true;
+
+      if (typeof ctrl.mode === "string") {
+        const m = ctrl.mode.toUpperCase();
+        if (m === "AUTO" || m === "MANUAL") appState.config.target_mode = m;
+      }
+      if (ctrl.fan !== undefined) appState.config.target_fan = Boolean(ctrl.fan);
+      if (ctrl.ac !== undefined) appState.config.target_ac = Boolean(ctrl.ac);
+      renderControlPage();
+    });
+
+    // 2. Dengarkan node /panel/telemetry (tempat Kendali_akuisisi.ino mengirim data sensor tiap 5 detik)
+    const unsubTelemetry = onValue(telemetryRef, (snapshot) => {
       const d = snapshot.val();
       if (!d) return;
 
       const elec = d.electrical || {};
       const out = d.output || {};
+      const prev = appState.telemetry;
       const mapped = {
         voltage: Number(elec.voltage ?? 0),
         current: Number(elec.current ?? 0),
@@ -983,7 +1006,7 @@ async function startFirebaseMode() {
         temp_air: Number(d.temperature?.air ?? 0),
         temp_panel: Number(d.temperature?.panel ?? 0),
         humidity: Number(d.humidity ?? 0),
-        actual_mode: d.mode || "AUTO",
+        actual_mode: String(d.mode || "AUTO").toUpperCase(),
         actual_fan: Boolean(out.fan),
         actual_ac: Boolean(out.ac),
         actual_buzzer: Boolean(out.buzzer),
@@ -993,14 +1016,39 @@ async function startFirebaseMode() {
         last_seen_at: new Date().toISOString()
       };
 
+      // Catat perubahan status di Activity Feed
+      if (
+        prev.actual_mode !== mapped.actual_mode ||
+        prev.actual_fan !== mapped.actual_fan ||
+        prev.actual_ac !== mapped.actual_ac ||
+        prev.actual_buzzer !== mapped.actual_buzzer
+      ) {
+        addLocalActivity(
+          "ESP32",
+          "ESP32 Panel",
+          mapped.actual_buzzer ? "ALARM_TRIGGERED" : "STATE_SYNC",
+          `Status ESP32 [${mapped.actual_mode}] -> Kipas:${mapped.actual_fan ? "ON" : "OFF"}, AC:${mapped.actual_ac ? "ON" : "OFF"}, Buzzer:${mapped.actual_buzzer ? "ON" : "OFF"}, Lampu:${mapped.actual_lamp ? "ON" : "OFF"} (Panel: ${mapped.temp_panel}°C)`
+        );
+      }
+
       appState.telemetry = mapped;
-      appState.config.target_mode = mapped.actual_mode;
-      appState.config.target_fan = mapped.actual_fan;
-      appState.config.target_ac = mapped.actual_ac;
+      if (!hasControlNode) {
+        appState.config.target_mode = mapped.actual_mode;
+        appState.config.target_fan = mapped.actual_fan;
+        appState.config.target_ac = mapped.actual_ac;
+      }
       appState.config.target_buzzer = mapped.actual_buzzer;
       appState.config.target_lamp = mapped.actual_lamp;
 
-      appState.historyLogs.push({ ...mapped, recorded_at: mapped.last_seen_at, mode: mapped.actual_mode, fan: mapped.actual_fan, ac: mapped.actual_ac, buzzer: mapped.actual_buzzer, lamp: mapped.actual_lamp });
+      appState.historyLogs.push({
+        ...mapped,
+        recorded_at: mapped.last_seen_at,
+        mode: mapped.actual_mode,
+        fan: mapped.actual_fan,
+        ac: mapped.actual_ac,
+        buzzer: mapped.actual_buzzer,
+        lamp: mapped.actual_lamp
+      });
       if (appState.historyLogs.length > 500) appState.historyLogs.shift();
 
       pushRealtimePoint(mapped);
@@ -1008,19 +1056,23 @@ async function startFirebaseMode() {
     });
 
     window.__firebaseBridge = {
-      unsubscribe: unsub,
+      unsubscribe: () => {
+        unsubControl();
+        unsubTelemetry();
+      },
       writeControl: async (patch) => {
-        const fbPatch = {};
-        if (patch.target_mode !== undefined) fbPatch["mode"] = patch.target_mode;
-        if (patch.target_fan !== undefined) fbPatch["output/fan"] = patch.target_fan;
-        if (patch.target_ac !== undefined) fbPatch["output/ac"] = patch.target_ac;
-        if (patch.target_buzzer !== undefined) fbPatch["output/buzzer"] = patch.target_buzzer;
-        if (patch.target_lamp !== undefined) fbPatch["output/lamp"] = patch.target_lamp;
-        await update(telemetryRef, fbPatch);
+        // Menulis langsung ke /panel/control sesuai readFirebaseControl() di Kendali_akuisisi.ino
+        const fbControlPatch = {};
+        if (patch.target_mode !== undefined) fbControlPatch["mode"] = patch.target_mode;
+        if (patch.target_fan !== undefined) fbControlPatch["fan"] = Boolean(patch.target_fan);
+        if (patch.target_ac !== undefined) fbControlPatch["ac"] = Boolean(patch.target_ac);
+        if (Object.keys(fbControlPatch).length > 0) {
+          await update(controlRef, fbControlPatch);
+        }
       }
     };
   } catch (err) {
-    console.error("Firebase Legacy Bridge error:", err);
+    console.error("Firebase Bridge error:", err);
     alert("Gagal terhubung ke Firebase RTDB: " + err.message);
   }
 }
@@ -1346,11 +1398,43 @@ function bindEvents() {
 }
 
 // ----------------------------------------------------------------------------
+// PWA INSTALL PROMPT & SERVICE WORKER
+// ----------------------------------------------------------------------------
+let deferredInstallPrompt = null;
+
+function initPwaSupport() {
+  if ("serviceWorker" in navigator && window.location.protocol.startsWith("http")) {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  }
+
+  const installBtn = document.getElementById("installAppBtn");
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    installBtn?.classList.remove("hidden");
+  });
+
+  installBtn?.addEventListener("click", async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    installBtn.classList.add("hidden");
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    installBtn?.classList.add("hidden");
+  });
+}
+
+// ----------------------------------------------------------------------------
 // INISIALISASI SAAT HALAMAN SIAP
 // ----------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   initCharts();
   bindEvents();
+  initPwaSupport();
   startActiveBackend();
 
   // Perbarui indikator umur heartbeat setiap 1 detik

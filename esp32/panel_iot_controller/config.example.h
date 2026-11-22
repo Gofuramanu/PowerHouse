@@ -2,8 +2,8 @@
 #define CONFIG_H
 
 // ============================================================================
-// KONFIGURASI FIRMWARE ESP32 — SALIN FILE INI MENJADI "config.h"
-// Jangan commit file config.h yang berisi kredensial asli ke Git!
+// KONFIGURASI FIRMWARE ESP32 (DISESUAIKAN 100% DENGAN KENDALI_AKUISISI.INO)
+// Salin file ini menjadi "config.h" dan isi kredensial WiFi & Supabase Anda.
 // ============================================================================
 
 // 1. Kredensial WiFi
@@ -11,38 +11,52 @@
 #define WIFI_PASSWORD       "PASSWORD_WIFI_ANDA"
 
 // 2. Kredensial Supabase Backend
-// Contoh URL: "https://abcdefghijklm.supabase.co" (tanpa garis miring di akhir)
 #define SUPABASE_URL        "https://PROJECT_ID_ANDA.supabase.co"
-// Gunakan ANON PUBLIC KEY (JANGAN pernah menanamkan service_role key di ESP32!)
 #define SUPABASE_ANON_KEY   "SUPABASE_ANON_PUBLIC_KEY_ANDA"
 
-// 3. Identitas Perangkat (DEVICE_SECRET_KEY opsional, biarkan "" jika tanpa kunci rahasia)
+// 3. Identitas Perangkat (DEVICE_SECRET_KEY opsional, biarkan "" jika tanpa kunci)
 #define DEVICE_ID           "panel-utama-01"
 #define DEVICE_SECRET_KEY   ""
 
-// 4. Definisi Pinout GPIO ESP32 (Sesuaikan dengan wiring aktual panel)
-#define PIN_DHT22           4     // Sensor Suhu Udara & Kelembapan (DHT22)
-#define PIN_DS18B20         5     // Sensor Suhu Panel (DS18B20 1-Wire, pasang resistor pull-up 4.7k)
+// 4. Definisi Pinout GPIO ESP32 (Sesuai Hardware Asli Kendali_akuisisi.ino)
+#define DHT_PIN             4     // Sensor Suhu Udara & Kelembapan (DHT22)
+#define DHT_TYPE            DHT22
+#define ONE_WIRE_PIN        5     // Sensor Suhu Panel (DS18B20 1-Wire)
 
 // Serial Hardware 2 (UART2) untuk Sensor Kelistrikan PZEM-004T v3.0
-#define PIN_PZEM_RX         16    // Hubungkan ke TX PZEM-004T
-#define PIN_PZEM_TX         17    // Hubungkan ke RX PZEM-004T
+#define PZEM_RX_PIN         16    // RX ESP32 (Hubungkan ke TX PZEM-004T)
+#define PZEM_TX_PIN         17    // TX ESP32 (Hubungkan ke RX PZEM-004T)
 
-// Pin Output Relay Aktuator (Gunakan Active-LOW / Active-HIGH sesuai modul relay)
-#define RELAY_ACTIVE_LOW    true  // Ubah ke false jika modul relay aktif pada logika HIGH
-#define PIN_RELAY_FAN       25    // Kipas Pendingin Panel
-#define PIN_RELAY_AC        26    // AC Split Ruangan / Panel
-#define PIN_RELAY_BUZZER    27    // Buzzer Alarm Overheat / Trip
-#define PIN_RELAY_LAMP      33    // Lampu Indikator / Penerangan Panel
+// LCD I2C 16x2
+#define LCD_SDA             21
+#define LCD_SCL             22
+#define LCD_ADDRESS         0x27  // Umum: 0x27 atau 0x3F
 
-// Tombol Manual Override Lokal & LED Status WiFi
-#define PIN_BTN_EMERGENCY   14    // Tombol fisik darurat / override lokal (Active LOW)
-#define PIN_LED_STATUS      2     // LED built-in ESP32
+// Pin Output Relay & Indikator (Sesuai Hardware Asli)
+#define RELAY_ACTIVE_LOW    true  // Relay Kipas & AC menggunakan logika Active-LOW
+#define RELAY_FAN_PIN       25    // Relay Kipas Pendingin Panel
+#define RELAY_AC_PIN        26    // Relay AC Split
 
-// 5. Pengaturan Interval & Fail-Safe
-#define SENSOR_INTERVAL_MS        1000UL   // Baca sensor setiap 1 detik
-#define SYNC_INTERVAL_MS          3000UL   // Kirim telemetry & ambil perintah tiap 3 detik
-#define OFFLINE_FAILSAFE_MS       15000UL  // Masuk mode AUTO aman jika koneksi putus > 15 detik
-#define HYSTERESIS_OFFSET_C       1.5f     // Histeresis suhu agar relay tidak cepat cetak-cetek
+// Buzzer (Transistor BC547) & Lampu Indikator menggunakan logika Active-HIGH
+#define BUZZER_PIN          27    // Buzzer 5V via transistor BC547 (HIGH = ON)
+#define LAMP_PIN            14    // Driver lampu indikator beban (HIGH = ON)
+
+// 5. Batas Temperatur Default & Proteksi Kompresor AC (Sesuai Kendali_akuisisi.ino)
+#define DEFAULT_FAN_ON_TEMP   30.0f
+#define DEFAULT_FAN_OFF_TEMP  28.0f
+#define DEFAULT_AC_ON_TEMP    35.0f
+#define DEFAULT_AC_OFF_TEMP   32.0f
+#define DEFAULT_ALARM_TEMP    40.0f
+#define HYSTERESIS_FAN_C      2.0f   // Selisih ON (30C) dan OFF (28C)
+#define HYSTERESIS_AC_C       3.0f   // Selisih ON (35C) dan OFF (32C)
+
+// Jeda minimum 180 detik (3 menit) sebelum AC boleh dinyalakan kembali
+#define AC_RESTART_DELAY_MS   180000UL
+
+// 6. Interval Pembacaan & Sinkronisasi
+#define SENSOR_INTERVAL_MS    2000UL   // Baca sensor setiap 2 detik
+#define SYNC_INTERVAL_MS      3000UL   // Sinkronisasi Supabase setiap 3 detik
+#define LCD_INTERVAL_MS       2000UL   // Update LCD 16x2 setiap 2 detik
+#define OFFLINE_FAILSAFE_MS   15000UL  // Fallback ke AUTO jika internet putus > 15 detik
 
 #endif

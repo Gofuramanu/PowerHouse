@@ -27,18 +27,18 @@ Dokumen ini disusun sebagai panduan operasional lengkap agar proyek dapat dipind
 
 Pinout berikut sesuai dengan template [`esp32/panel_iot_controller/config.example.h`](../esp32/panel_iot_controller/config.example.h):
 
-| Pin GPIO ESP32 | Terhubung Ke | Keterangan Teknis |
+| Pin GPIO ESP32 | Terhubung Ke | Keterangan Teknis (Sesuai `Kendali_akuisisi.ino`) |
 |---|---|---|
-| **GPIO 4** | Data DHT22 | Pasang pull-up 10 kΩ ke 3.3V (jika modul belum punya resistor) |
-| **GPIO 5** | Data DS18B20 | **Wajib** pasang resistor pull-up 4.7 kΩ antara GPIO 5 dan 3.3V |
-| **GPIO 16 (RX2)** | TX PZEM-004T v3.0 | Komunikasi serial UART2 (9600 bps) — gunakan *level shifter* jika PZEM 5V |
-| **GPIO 17 (TX2)** | RX PZEM-004T v3.0 | Komunikasi serial UART2 |
-| **GPIO 25** | Relay CH1 (Kipas AC) | `RELAY_ACTIVE_LOW = true` (default modul relay optocoupler) |
-| **GPIO 26** | Relay CH2 (AC Split) | Kontrol koil kontaktor AC |
-| **GPIO 27** | Relay CH3 (Buzzer) | Buzzer alarm suhu kritis |
-| **GPIO 33** | Relay CH4 (Lampu) | Lampu penerangan / indikator panel |
-| **GPIO 14** | Tombol Darurat (Emergency) | Dihubungkan ke GND saat ditekan (`INPUT_PULLUP`) |
-| **GPIO 2** | LED Status Built-in | Menyala saat WiFi terhubung |
+| **GPIO 4** | Data DHT22 | Sensor suhu udara & kelembapan (`DHT_PIN = 4`) |
+| **GPIO 5** | Data DS18B20 | Sensor suhu panel 1-Wire (`ONE_WIRE_PIN = 5`, pull-up 4.7 kΩ) |
+| **GPIO 16 (RX2)** | TX PZEM-004T v3.0 | Komunikasi serial UART2 (`PZEM_RX_PIN = 16`) |
+| **GPIO 17 (TX2)** | RX PZEM-004T v3.0 | Komunikasi serial UART2 (`PZEM_TX_PIN = 17`) |
+| **GPIO 21 (SDA)** | SDA LCD 16x2 I2C | Layar LCD I2C 16x2 (`LCD_ADDRESS = 0x27`) |
+| **GPIO 22 (SCL)** | SCL LCD 16x2 I2C | Clock I2C LCD 16x2 |
+| **GPIO 25** | Relay Kipas Pendingin | `RELAY_ACTIVE_LOW = true` (`ON >= 30°C`, `OFF <= 28°C`) |
+| **GPIO 26** | Relay AC Split | `RELAY_ACTIVE_LOW = true` (`ON >= 35°C`, `OFF <= 32°C`, jeda restart 180 detik) |
+| **GPIO 27** | Buzzer 5V (BC547) | **Active-HIGH** via transistor BC547 (menyala saat suhu panel `>= 40°C`) |
+| **GPIO 14** | Lampu Indikator | **Active-HIGH** driver lampu indikator (menyala saat Kipas atau AC aktif) |
 
 ---
 

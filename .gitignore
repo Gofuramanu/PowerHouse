@@ -4,6 +4,7 @@
 .env.*.local
 js/config.js
 esp32/panel_iot_controller/config.h
+Kendali_akuisisi.ino
 
 # Build & editor artifacts
 node_modules/
