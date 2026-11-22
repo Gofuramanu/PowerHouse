@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power House IoT — Monitoring &amp; Control Panel Listrik ESP32</title>
+  <link rel="stylesheet" href="./css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar Backdrop (Mobile) -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo">⚡</div>
+        <div>
+          <h1>POWER HOUSE</h1>
+          <span>ESP32 IoT Panel Control</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Navigasi Dashboard">
+        <button class="nav-item active" data-page="overview">
+          <span class="nav-icon">📊</span>
+          <span>1. Overview</span>
+        </button>
+        <button class="nav-item" data-page="electrical">
+          <span class="nav-icon">⚡</span>
+          <span>2. Electrical Monitoring</span>
+        </button>
+        <button class="nav-item" data-page="environment">
+          <span class="nav-icon">🌡️</span>
+          <span>3. Environment Monitoring</span>
+        </button>
+        <button class="nav-item" data-page="control">
+          <span class="nav-icon">🎛️</span>
+          <span>4. Device Control</span>
+        </button>
+        <button class="nav-item" data-page="history">
+          <span class="nav-icon">📈</span>
+          <span>5. History &amp; Analytics</span>
+        </button>
+        <button class="nav-item" data-page="settings">
+          <span class="nav-icon">⚙️</span>
+          <span>6. Settings</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="device-chip">
+          <span class="chip-label">Perangkat Aktif</span>
+          <strong id="sidebarDeviceId">panel-utama-01</strong>
+        </div>
+        <a href="./firebase-legacy-test.html" class="legacy-link" target="_blank" rel="noopener">
+          🔍 Buka Alat Audit Firebase Lama
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN WORKSPACE -->
+    <div class="main-area">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="menuToggleBtn" class="menu-toggle" aria-label="Buka Menu">☰</button>
+          <div>
+            <h2 id="pageTitle">Overview Sistem</h2>
+            <p id="pageSubtitle" class="topbar-subtitle">Ringkasan status kelistrikan, suhu panel, dan aktuator secara real-time</p>
+          </div>
+        </div>
+
+        <div class="topbar-badges">
+          <span id="backendBadge" class="pill pill-info">Mode: Simulasi Interaktif</span>
+          <span id="heartbeatBadge" class="pill pill-offline">● ESP32: Menunggu</span>
+          <button id="authActionBtn" class="pill pill-auth" type="button">
+            👤 <span id="userRoleLabel">Demo Admin</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ALERT BANNER -->
+      <div id="alertBanner" class="alert-banner hidden" role="alert">
+        <span id="alertBannerIcon">⚠️</span>
+        <div id="alertBannerText">Peringatan Sistem</div>
+      </div>
+
+      <!-- PAGE CONTAINER -->
+      <main class="content">
+        <!-- ==================== HALAMAN 1: OVERVIEW ==================== -->
+        <section id="page-overview" class="page active">
+          <div class="status-strip">
+            <div class="strip-item">
+              <span class="strip-label">Status Koneksi ESP32</span>
+              <strong id="ovWifiStatus">--</strong>
+              <small id="ovLastSeen">Pembaruan: --</small>
+            </div>
+            <div class="strip-item">
+              <span class="strip-label">Mode Operasi</span>
+              <strong id="ovMode">--</strong>
+              <small id="ovModeHint">Sinkronisasi kontrol</small>
+            </div>
+            <div class="strip-item">
+              <span class="strip-label">Waktu Operasi (Uptime)</span>
+              <strong id="ovUptime">--</strong>
+              <small>Berjalan nonstop</small>
+            </div>
+            <div class="strip-item">
+              <span class="strip-label">Kesehatan Termal Panel</span>
+              <strong id="ovThermalHealth">--</strong>
+              <small id="ovThermalDelta">ΔT Panel-Udara: --</small>
+            </div>
+          </div>
+
+          <h3 class="section-heading">Ringkasan Kelistrikan Real-Time</h3>
+          <div class="grid-cards cols-3">
+            <div class="metric-card">
+              <span class="metric-label">⚡ Tegangan (Voltage)</span>
+              <div class="metric-value"><span id="ovVoltage">--</span> <small>V</small></div>
+              <span class="metric-foot">Jala-jala AC</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">🔌 Arus Beban (Current)</span>
+              <div class="metric-value"><span id="ovCurrent">--</span> <small>A</small></div>
+              <span class="metric-foot">Beban panel saat ini</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">💡 Daya Aktif (Power)</span>
+              <div class="metric-value"><span id="ovPower">--</span> <small>W</small></div>
+              <span class="metric-foot">Konsumsi sesaat</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">🔋 Energi Terpakai</span>
+              <div class="metric-value"><span id="ovEnergy">--</span> <small>kWh</small></div>
+              <span class="metric-foot">Akumulasi meter</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">〰️ Frekuensi</span>
+              <div class="metric-value"><span id="ovFrequency">--</span> <small>Hz</small></div>
+              <span class="metric-foot">Standar PLN 50 Hz</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">📊 Power Factor</span>
+              <div class="metric-value"><span id="ovPf">--</span> <small>Cos φ</small></div>
+              <span class="metric-foot">Efisiensi daya</span>
+            </div>
+          </div>
+
+          <div class="two-col-layout">
+            <div class="panel-box">
+              <h3 class="box-title">Kondisi Lingkungan Panel</h3>
+              <div class="env-mini-grid">
+                <div class="env-mini">
+                  <span>Suhu Panel (DS18B20)</span>
+                  <strong id="ovTempPanel">-- °C</strong>
+                </div>
+                <div class="env-mini">
+                  <span>Suhu Udara (DHT22)</span>
+                  <strong id="ovTempAir">-- °C</strong>
+                </div>
+                <div class="env-mini">
+                  <span>Kelembapan</span>
+                  <strong id="ovHumidity">-- %</strong>
+                </div>
+              </div>
+
+              <h3 class="box-title" style="margin-top: 20px;">Status Output Aktuator</h3>
+              <div class="actuator-pills">
+                <div class="actuator-pill">
+                  <span>🌀 Kipas AC</span>
+                  <span id="ovFanBadge" class="state-badge off">OFF</span>
+                </div>
+                <div class="actuator-pill">
+                  <span>❄️ AC Split</span>
+                  <span id="ovAcBadge" class="state-badge off">OFF</span>
+                </div>
+                <div class="actuator-pill">
+                  <span>🔔 Buzzer</span>
+                  <span id="ovBuzzerBadge" class="state-badge off">OFF</span>
+                </div>
+                <div class="actuator-pill">
+                  <span>💡 Lampu</span>
+                  <span id="ovLampBadge" class="state-badge off">OFF</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-box">
+              <div class="box-header-row">
+                <h3 class="box-title">Aktivitas Terbaru</h3>
+                <button class="btn-link" data-goto="history">Lihat Semua &rarr;</button>
+              </div>
+              <ul id="overviewActivityList" class="activity-feed">
+                <li class="empty-note">Menunggu data aktivitas sistem...</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== HALAMAN 2: ELECTRICAL MONITORING ==================== -->
+        <section id="page-electrical" class="page">
+          <div class="grid-cards cols-3">
+            <div class="metric-card accent-blue">
+              <div class="card-top-row">
+                <span class="metric-label">Tegangan Listrik</span>
+                <span id="elVoltageQuality" class="quality-tag">--</span>
+              </div>
+              <div class="metric-value"><span id="elVoltage">--</span> <small>Volt</small></div>
+              <span class="metric-foot">Rentang aman: 207V – 242V</span>
+            </div>
+
+            <div class="metric-card accent-cyan">
+              <div class="card-top-row">
+                <span class="metric-label">Arus Listrik</span>
+                <span class="quality-tag neutral">Sensor PZEM-004T</span>
+              </div>
+              <div class="metric-value"><span id="elCurrent">--</span> <small>Ampere</small></div>
+              <span class="metric-foot">Daya Semu: <strong id="elApparentPower">--</strong> VA</span>
+            </div>
+
+            <div class="metric-card accent-emerald">
+              <div class="card-top-row">
+                <span class="metric-label">Daya Aktif</span>
+                <span class="quality-tag neutral">Real-Time</span>
+              </div>
+              <div class="metric-value"><span id="elPower">--</span> <small>Watt</small></div>
+              <span class="metric-foot">Akumulasi Energi: <strong id="elEnergy">--</strong> kWh</span>
+            </div>
+
+            <div class="metric-card">
+              <div class="card-top-row">
+                <span class="metric-label">Frekuensi Jaringan</span>
+                <span id="elFreqQuality" class="quality-tag">--</span>
+              </div>
+              <div class="metric-value"><span id="elFrequency">--</span> <small>Hz</small></div>
+              <span class="metric-foot">Toleransi standar: 49.5 – 50.5 Hz</span>
+            </div>
+
+            <div class="metric-card">
+              <div class="card-top-row">
+                <span class="metric-label">Power Factor (Cos φ)</span>
+                <span id="elPfQuality" class="quality-tag">--</span>
+              </div>
+              <div class="metric-value"><span id="elPf">--</span></div>
+              <span class="metric-foot">Ideal industri: &ge; 0.85</span>
+            </div>
+
+            <div class="metric-card">
+              <div class="card-top-row">
+                <span class="metric-label">Estimasi Biaya Sesi</span>
+                <span class="quality-tag neutral">Tarif ~Rp 1.445/kWh</span>
+              </div>
+              <div class="metric-value"><span id="elEstCost">Rp --</span></div>
+              <span class="metric-foot">Berdasarkan total kWh terbaca</span>
+            </div>
+          </div>
+
+          <div class="two-col-layout">
+            <div class="panel-box chart-box">
+              <h3 class="box-title">Grafik Real-Time Daya (W) &amp; Arus (A)</h3>
+              <div class="chart-wrapper">
+                <canvas id="electricalPowerChart"></canvas>
+              </div>
+            </div>
+            <div class="panel-box chart-box">
+              <h3 class="box-title">Grafik Real-Time Tegangan (V) &amp; Power Factor</h3>
+              <div class="chart-wrapper">
+                <canvas id="electricalVoltageChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== HALAMAN 3: ENVIRONMENT MONITORING ==================== -->
+        <section id="page-environment" class="page">
+          <div class="grid-cards cols-4">
+            <div class="metric-card">
+              <div class="card-top-row">
+                <span class="metric-label">Suhu Panel (DS18B20)</span>
+                <span id="envPanelZone" class="quality-tag">--</span>
+              </div>
+              <div class="metric-value"><span id="envTempPanel">--</span> <small>&deg;C</small></div>
+              <span class="metric-foot">Batas Kipas: <strong id="envThFan">32</strong>&deg;C | Alarm: <strong id="envThAlarm">45</strong>&deg;C</span>
+            </div>
+
+            <div class="metric-card">
+              <div class="card-top-row">
+                <span class="metric-label">Suhu Udara (DHT22)</span>
+                <span class="quality-tag neutral">Ruang Panel</span>
+              </div>
+              <div class="metric-value"><span id="envTempAir">--</span> <small>&deg;C</small></div>
+              <span class="metric-foot">Batas AC Split: <strong id="envThAc">35</strong>&deg;C</span>
+            </div>
+
+            <div class="metric-card">
+              <div class="card-top-row">
+                <span class="metric-label">Kelembapan Relatif</span>
+                <span id="envHumidityZone" class="quality-tag">--</span>
+              </div>
+              <div class="metric-value"><span id="envHumidity">--</span> <small>%</small></div>
+              <span class="metric-foot">Ideal panel listrik: 40% – 70%</span>
+            </div>
+
+            <div class="metric-card">
+              <div class="card-top-row">
+                <span class="metric-label">Selisih Termal (ΔT)</span>
+                <span class="quality-tag neutral">Panel - Udara</span>
+              </div>
+              <div class="metric-value"><span id="envDeltaTemp">--</span> <small>&deg;C</small></div>
+              <span class="metric-foot">Indikasi pemanasan komponen internal</span>
+            </div>
+          </div>
+
+          <div class="panel-box chart-box" style="margin-top: 18px;">
+            <h3 class="box-title">Tren Suhu Panel, Suhu Udara &amp; Kelembapan (Real-Time)</h3>
+            <div class="chart-wrapper tall">
+              <canvas id="environmentChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== HALAMAN 4: DEVICE CONTROL ==================== -->
+        <section id="page-control" class="page">
+          <div id="controlGuardBanner" class="info-banner hidden">
+            🔒 <strong>Mode Read-Only:</strong> Akun Anda berstatus <em>Viewer</em> atau belum login sebagai Admin/Operator. Tombol kontrol dikunci demi keamanan.
+          </div>
+
+          <div class="panel-box control-mode-card">
+            <div>
+              <h3>Mode Operasi Kendali Panel</h3>
+              <p class="muted-text">
+                <strong>AUTO:</strong> ESP32 mengatur Kipas, AC, dan Buzzer secara otomatis berdasarkan ambang batas suhu dan tetap aman saat internet terputus.<br>
+                <strong>MANUAL:</strong> Operator memegang kendali langsung aktuator melalui dashboard (proteksi darurat overheat tetap aktif di ESP32).
+              </p>
+            </div>
+            <div class="mode-switch-group">
+              <button id="btnModeAuto" class="mode-btn active" type="button">AUTO</button>
+              <button id="btnModeManual" class="mode-btn" type="button">MANUAL</button>
+            </div>
+          </div>
+
+          <div class="grid-cards cols-2" style="margin-top: 18px;">
+            <div class="control-card">
+              <div class="control-head">
+                <div>
+                  <h4>🌀 Kipas Pendingin Panel</h4>
+                  <p>Sirkulasi udara di dalam enclosure panel listrik</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="ctrlFan">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="control-sync-meta">
+                <span>Target Perintah: <strong id="targetFanText">--</strong></span>
+                <span>Status Aktual ESP32: <strong id="actualFanText">--</strong></span>
+              </div>
+            </div>
+
+            <div class="control-card">
+              <div class="control-head">
+                <div>
+                  <h4>❄️ AC Split Power House</h4>
+                  <p>Pendinginan ruang utama ketika suhu tinggi</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="ctrlAc">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="control-sync-meta">
+                <span>Target Perintah: <strong id="targetAcText">--</strong></span>
+                <span>Status Aktual ESP32: <strong id="actualAcText">--</strong></span>
+              </div>
+            </div>
+
+            <div class="control-card">
+              <div class="control-head">
+                <div>
+                  <h4>🔔 Buzzer Alarm</h4>
+                  <p>Peringatan suara lokal di panel saat kondisi darurat</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="ctrlBuzzer">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="control-sync-meta">
+                <span>Target Perintah: <strong id="targetBuzzerText">--</strong></span>
+                <span>Status Aktual ESP32: <strong id="actualBuzzerText">--</strong></span>
+              </div>
+            </div>
+
+            <div class="control-card">
+              <div class="control-head">
+                <div>
+                  <h4>💡 Lampu Penerangan Panel</h4>
+                  <p>Dapat dikontrol kapan saja saat inspeksi atau malam hari</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="ctrlLamp">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="control-sync-meta">
+                <span>Target Perintah: <strong id="targetLampText">--</strong></span>
+                <span>Status Aktual ESP32: <strong id="actualLampText">--</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div id="syncStatusNote" class="sync-note">
+            Status sinkronisasi perintah: Siap
+          </div>
+        </section>
+
+        <!-- ==================== HALAMAN 5: HISTORY & ANALYTICS ==================== -->
+        <section id="page-history" class="page">
+          <div class="panel-box filter-bar">
+            <div class="filter-controls">
+              <div class="field-inline">
+                <label for="historyRangeSelect">Rentang Waktu</label>
+                <select id="historyRangeSelect">
+                  <option value="1h">1 Jam Terakhir</option>
+                  <option value="24h" selected>24 Jam Terakhir</option>
+                  <option value="7d">7 Hari Terakhir</option>
+                  <option value="30d">30 Hari Terakhir</option>
+                  <option value="custom">Custom Tanggal</option>
+                </select>
+              </div>
+
+              <div id="customDateWrap" class="custom-dates hidden">
+                <input type="date" id="historyStartDate" aria-label="Tanggal Mulai">
+                <span>s/d</span>
+                <input type="date" id="historyEndDate" aria-label="Tanggal Selesai">
+              </div>
+
+              <button id="btnLoadHistory" class="btn-primary" type="button">Muat Data Histori</button>
+            </div>
+
+            <button id="btnExportCsv" class="btn-secondary" type="button">⬇️ Export CSV</button>
+          </div>
+
+          <div class="grid-cards cols-4" style="margin-top: 16px;">
+            <div class="metric-card">
+              <span class="metric-label">Daya Puncak (Peak Power)</span>
+              <div class="metric-value"><span id="histPeakPower">--</span> <small>W</small></div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Rata-rata Suhu Panel</span>
+              <div class="metric-value"><span id="histAvgTemp">--</span> <small>&deg;C</small></div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Konsumsi Energi Periode</span>
+              <div class="metric-value"><span id="histDeltaEnergy">--</span> <small>kWh</small></div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Rata-rata Power Factor</span>
+              <div class="metric-value"><span id="histAvgPf">--</span></div>
+            </div>
+          </div>
+
+          <div class="two-col-layout">
+            <div class="panel-box chart-box">
+              <h3 class="box-title">Grafik Histori Daya &amp; Arus</h3>
+              <div class="chart-wrapper">
+                <canvas id="historyPowerChart"></canvas>
+              </div>
+            </div>
+            <div class="panel-box chart-box">
+              <h3 class="box-title">Grafik Histori Suhu Panel &amp; Udara</h3>
+              <div class="chart-wrapper">
+                <canvas id="historyTempChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-box" style="margin-top: 18px;">
+            <h3 class="box-title">Riwayat Aktivitas &amp; Perubahan Status Perangkat (Audit Trail)</h3>
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Waktu</th>
+                    <th>Sumber</th>
+                    <th>Aktor</th>
+                    <th>Jenis Kejadian</th>
+                    <th>Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody id="historyActivityBody">
+                  <tr>
+                    <td colspan="5" class="empty-note">Belum ada catatan aktivitas.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== HALAMAN 6: SETTINGS ==================== -->
+        <section id="page-settings" class="page">
+          <div class="two-col-layout">
+            <form id="backendConfigForm" class="panel-box form-card">
+              <h3 class="box-title">Koneksi Backend &amp; Sumber Data</h3>
+              <p class="muted-text" style="margin-bottom: 14px;">
+                Pilih sumber backend aktif. Kredensial disimpan lokal di browser (hanya <code>Anon Public Key</code> yang aman untuk frontend; jangan pernah memasukkan <code>service_role</code> key).
+              </p>
+
+              <div class="form-group">
+                <label for="cfgBackendMode">Mode Sumber Data</label>
+                <select id="cfgBackendMode">
+                  <option value="simulator">Simulasi Interaktif (Demo / Offline Test)</option>
+                  <option value="supabase">Supabase Cloud (PostgreSQL + Realtime) — Rekomendasi</option>
+                  <option value="firebase">Firebase Legacy RTDB (Audit Perangkat Lama)</option>
+                </select>
+              </div>
+
+              <div id="supabaseFields">
+                <div class="form-group">
+                  <label for="cfgSupabaseUrl">Supabase Project URL</label>
+                  <input type="url" id="cfgSupabaseUrl" placeholder="https://xxxxxxxxxxxx.supabase.co">
+                </div>
+                <div class="form-group">
+                  <label for="cfgSupabaseKey">Supabase Anon Public Key</label>
+                  <input type="text" id="cfgSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                </div>
+                <div class="form-group">
+                  <label for="cfgDeviceId">Device ID Target</label>
+                  <input type="text" id="cfgDeviceId" value="panel-utama-01" placeholder="panel-utama-01">
+                </div>
+              </div>
+
+              <div id="firebaseFields" class="hidden">
+                <div class="form-group">
+                  <label for="cfgFirebaseDbUrl">Firebase Database URL</label>
+                  <input type="url" id="cfgFirebaseDbUrl" value="https://kendali-akuisisi-data-default-rtdb.firebaseio.com/">
+                </div>
+                <div class="form-group">
+                  <label for="cfgFirebaseApiKey">Firebase Web API Key</label>
+                  <input type="text" id="cfgFirebaseApiKey" value="AIzaSyDVroHlxiu8K5kjnQDZKtffHLshoFBuaUo">
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-primary">Simpan &amp; Terapkan Koneksi</button>
+              </div>
+            </form>
+
+            <form id="thresholdForm" class="panel-box form-card">
+              <h3 class="box-title">Ambang Batas Otomatisasi &amp; Logging</h3>
+              <p class="muted-text" style="margin-bottom: 14px;">
+                Pengaturan ini disimpan ke tabel <code>panel_config</code> dan otomatis dikirim ke ESP32 setiap kali perangkat melakukan sinkronisasi.
+              </p>
+
+              <div class="form-group">
+                <label for="cfgThFan">Ambang Suhu Kipas ON (&deg;C)</label>
+                <input type="number" step="0.5" min="15" max="80" id="cfgThFan" value="32">
+              </div>
+
+              <div class="form-group">
+                <label for="cfgThAc">Ambang Suhu AC Split ON (&deg;C)</label>
+                <input type="number" step="0.5" min="15" max="85" id="cfgThAc" value="35">
+              </div>
+
+              <div class="form-group">
+                <label for="cfgThAlarm">Ambang Suhu Alarm Overheat (&deg;C)</label>
+                <input type="number" step="0.5" min="20" max="100" id="cfgThAlarm" value="45">
+              </div>
+
+              <div class="form-group">
+                <label for="cfgLogInterval">Interval Pencatatan Histori Database (Detik)</label>
+                <input type="number" step="5" min="5" max="3600" id="cfgLogInterval" value="60">
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" id="btnSaveThresholds" class="btn-primary">Simpan Ambang Batas</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel-box" style="margin-top: 18px;">
+            <div class="box-header-row">
+              <div>
+                <h3 class="box-title">Sesi Pengguna &amp; Kontrol Akses (RBAC)</h3>
+                <p class="muted-text" id="settingsAuthSummary">Status login akan ditampilkan di sini.</p>
+              </div>
+              <div class="auth-buttons-row">
+                <button id="btnOpenLoginModal" class="btn-primary" type="button">Login Akun Supabase</button>
+                <button id="btnLogoutSupabase" class="btn-secondary hidden" type="button">Logout</button>
+              </div>
+            </div>
+
+            <div id="simulatorLabBox" class="sim-lab-box">
+              <strong>Panel Uji Simulasi (Aktif saat Mode Simulasi):</strong>
+              <span>Uji respons otomatis panel terhadap perubahan kondisi lapangan:</span>
+              <div class="sim-buttons">
+                <button id="btnSimNormal" class="btn-secondary" type="button">Kondisi Normal (28&deg;C)</button>
+                <button id="btnSimWarm" class="btn-secondary" type="button">Panel Hangat (36&deg;C)</button>
+                <button id="btnSimOverheat" class="btn-danger" type="button">Simulasi Overheat (47&deg;C)</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL LOGIN SUPABASE -->
+  <div id="loginModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="loginModalTitle">Login Operator / Admin (Supabase)</h3>
+        <button id="closeLoginModalBtn" class="icon-close" type="button" aria-label="Tutup">&times;</button>
+      </div>
+      <form id="supabaseLoginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email Pengguna</label>
+          <input type="email" id="loginEmail" required placeholder="operator@perusahaan.com">
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••">
+        </div>
+        <p id="loginErrorMsg" class="error-text hidden"></p>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" style="width: 100%;">Masuk ke Sistem</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

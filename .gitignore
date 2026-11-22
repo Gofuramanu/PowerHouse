@@ -1,0 +1,14 @@
+# File kredensial sensitif (JANGAN PERNAH commit ke Git!)
+.env
+.env.local
+.env.*.local
+js/config.js
+esp32/panel_iot_controller/config.h
+
+# Build & editor artifacts
+node_modules/
+dist/
+.vercel/
+.DS_Store
+Thumbs.db
+*.log

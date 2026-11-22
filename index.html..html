@@ -1,0 +1,408 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Power House Monitoring</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #101827;
+  color: #f1f5f9;
+  padding: 25px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+header h1 {
+  font-size: 25px;
+}
+
+header p {
+  color: #94a3b8;
+  margin-top: 7px;
+}
+
+.status {
+  padding: 9px 15px;
+  border-radius: 20px;
+  background: #374151;
+  font-size: 13px;
+}
+
+.section-title {
+  margin: 25px 0 15px;
+  font-size: 18px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.card p {
+  color: #94a3b8;
+  font-size: 14px;
+  margin-bottom: 13px;
+}
+
+.value {
+  font-size: 27px;
+  font-weight: bold;
+}
+
+.unit {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.output {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.badge {
+  padding: 7px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.on {
+  background: #14532d;
+  color: #86efac;
+}
+
+.off {
+  background: #374151;
+  color: #cbd5e1;
+}
+
+footer {
+  margin-top: 30px;
+  color: #64748b;
+  font-size: 12px;
+  text-align: center;
+}
+
+@media(max-width: 800px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media(max-width: 450px) {
+  body {
+    padding: 15px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+
+  .card {
+    padding: 13px;
+  }
+
+  .value {
+    font-size: 21px;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+  <div>
+    <h1>POWER HOUSE MONITORING</h1>
+    <p>Industrial Temperature & Electrical Monitoring</p>
+  </div>
+
+  <div class="status" id="connection">
+    Menghubungkan...
+  </div>
+</header>
+
+<h2 class="section-title">Monitoring Temperatur</h2>
+
+<div class="grid">
+
+  <div class="card">
+    <p>🌡 Suhu Udara</p>
+    <div class="value" id="air">--</div>
+    <span class="unit">°C | DHT22</span>
+  </div>
+
+  <div class="card">
+    <p>🌡 Suhu Panel</p>
+    <div class="value" id="panel">--</div>
+    <span class="unit">°C | DS18B20</span>
+  </div>
+
+  <div class="card">
+    <p>💧 Kelembapan</p>
+    <div class="value" id="humidity">--</div>
+    <span class="unit">%</span>
+  </div>
+
+  <div class="card">
+    <p>📶 WiFi ESP32</p>
+    <div class="value" id="wifi">--</div>
+    <span class="unit">Status koneksi</span>
+  </div>
+
+</div>
+
+<h2 class="section-title">Monitoring Kelistrikan</h2>
+
+<div class="grid">
+
+  <div class="card">
+    <p>⚡ Tegangan</p>
+    <div class="value" id="voltage">--</div>
+    <span class="unit">Volt</span>
+  </div>
+
+  <div class="card">
+    <p>⚡ Arus</p>
+    <div class="value" id="current">--</div>
+    <span class="unit">Ampere</span>
+  </div>
+
+  <div class="card">
+    <p>🔌 Daya</p>
+    <div class="value" id="power">--</div>
+    <span class="unit">Watt</span>
+  </div>
+
+  <div class="card">
+    <p>🔋 Energi</p>
+    <div class="value" id="energy">--</div>
+    <span class="unit">kWh</span>
+  </div>
+
+  <div class="card">
+    <p>〰 Frekuensi</p>
+    <div class="value" id="frequency">--</div>
+    <span class="unit">Hz</span>
+  </div>
+
+  <div class="card">
+    <p>📊 Power Factor</p>
+    <div class="value" id="pf">--</div>
+    <span class="unit">Cos φ</span>
+  </div>
+
+</div>
+
+<h2 class="section-title">Status Aktuator</h2>
+
+<div class="output">
+  <span>🌀 Kipas AC</span>
+  <span class="badge off" id="fan">OFF</span>
+</div>
+
+<div class="output">
+  <span>❄️ AC Split</span>
+  <span class="badge off" id="ac">OFF</span>
+</div>
+
+<div class="output">
+  <span>🔔 Buzzer</span>
+  <span class="badge off" id="buzzer">OFF</span>
+</div>
+
+<div class="output">
+  <span>💡 Lampu</span>
+  <span class="badge off" id="lamp">OFF</span>
+</div>
+
+<h2 class="section-title">Informasi Sistem</h2>
+
+<div class="grid">
+  <div class="card">
+    <p>Mode Kendali</p>
+    <div class="value" id="mode">--</div>
+  </div>
+
+  <div class="card">
+    <p>Waktu Operasi</p>
+    <div class="value" id="uptime">--</div>
+    <span class="unit">Detik</span>
+  </div>
+</div>
+
+<footer>
+  Smart Industrial Power House Monitoring System
+  <br><br>
+  ESP32 | Firebase | Internet of Things
+  <br>
+  Pembaruan data: <span id="lastUpdate">Menunggu data</span>
+</footer>
+
+</div>
+
+<script type="module">
+
+// IMPORT FIREBASE
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+
+import {
+  getDatabase,
+  ref,
+  onValue
+} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-database.js";
+
+import {
+  getAuth,
+  signInAnonymously
+} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+
+// KONFIGURASI FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyDVroHlxiu8K5kjnQDZKtffHLshoFBuaUo",
+  authDomain: "kendali-akuisisi-data.firebaseapp.com",
+  databaseURL: "https://kendali-akuisisi-data-default-rtdb.firebaseio.com/",
+  projectId: "kendali-akuisisi-data",
+  storageBucket: "kendali-akuisisi-data.firebasestorage.app",
+  messagingSenderId: "287175064493",
+  appId: "1:287175064493:web:0a4357804b502070ddff24"
+};
+
+// INISIALISASI
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+// FUNGSI MENAMPILKAN NILAI
+function show(id, value) {
+  document.getElementById(id).textContent =
+    value ?? "--";
+}
+
+// FUNGSI STATUS OUTPUT
+function outputStatus(id, value) {
+  const el = document.getElementById(id);
+
+  el.textContent = value === true ? "ON" : "OFF";
+  el.className = "badge " +
+    (value === true ? "on" : "off");
+}
+
+// AUTENTIKASI DAN BACA DATABASE
+signInAnonymously(auth)
+.then(() => {
+
+  document.getElementById("connection").textContent =
+    "● Firebase Terhubung";
+
+  const telemetryRef = ref(db, "panel/telemetry");
+
+  onValue(telemetryRef, (snapshot) => {
+
+    const data = snapshot.val();
+
+    if (!data) {
+      document.getElementById("connection").textContent =
+        "Database kosong";
+      return;
+    }
+
+    // TEMPERATUR
+    show("air", data.temperature?.air);
+    show("panel", data.temperature?.panel);
+    show("humidity", data.humidity);
+
+    // WIFI
+    show("wifi",
+      data.wifiConnected ? "ONLINE" : "OFFLINE"
+    );
+
+    // KELISTRIKAN
+    const electrical = data.electrical || {};
+
+    show("voltage", electrical.voltage);
+    show("current", electrical.current);
+    show("power", electrical.power);
+    show("energy", electrical.energy);
+    show("frequency", electrical.frequency);
+    show("pf", electrical.powerFactor);
+
+    // OUTPUT AKTUATOR
+    const output = data.output || {};
+
+    outputStatus("fan", output.fan);
+    outputStatus("ac", output.ac);
+    outputStatus("buzzer", output.buzzer);
+    outputStatus("lamp", output.lamp);
+
+    // INFORMASI SISTEM
+    show("mode", data.mode);
+    show("uptime", data.uptimeSeconds);
+
+    // WAKTU PEMBARUAN DASHBOARD
+    show("lastUpdate", new Date().toLocaleTimeString("id-ID"));
+
+    document.getElementById("connection").textContent =
+      "● Firebase Terhubung";
+
+  }, (error) => {
+
+    document.getElementById("connection").textContent =
+      "Gagal membaca database";
+
+    console.error("Firebase:", error);
+  });
+
+})
+.catch((error) => {
+
+  document.getElementById("connection").textContent =
+    "Autentikasi gagal";
+
+  console.error("Authentication:", error);
+});
+
+</script>
+
+</body>
+</html>

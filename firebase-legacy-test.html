@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit &amp; Diagnostik Firebase Legacy — Power House Monitoring</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0f172a;
+      color: #f1f5f9;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .notice-banner {
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid #f59e0b;
+      color: #fde68a;
+      padding: 14px 18px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: 24px;
+    }
+
+    header p {
+      color: #94a3b8;
+      margin-top: 4px;
+      font-size: 14px;
+    }
+
+    .status {
+      padding: 9px 16px;
+      border-radius: 20px;
+      background: #334155;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status.connected {
+      background: #14532d;
+      color: #86efac;
+      border: 1px solid #22c55e;
+    }
+
+    .status.error {
+      background: #7f1d1d;
+      color: #fca5a5;
+      border: 1px solid #ef4444;
+    }
+
+    .section-title {
+      margin: 24px 0 12px;
+      font-size: 17px;
+      color: #e2e8f0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .card p {
+      color: #94a3b8;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .value {
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    .unit {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .output {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      padding: 6px 13px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .on {
+      background: #14532d;
+      color: #86efac;
+    }
+
+    .off {
+      background: #374151;
+      color: #cbd5e1;
+    }
+
+    .diag-panel {
+      background: #020617;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 24px;
+    }
+
+    .diag-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+      font-size: 13px;
+    }
+
+    .diag-meta div {
+      background: #0f172a;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+    }
+
+    .diag-meta span {
+      display: block;
+      color: #64748b;
+      font-size: 11px;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    pre {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 14px;
+      overflow-x: auto;
+      font-size: 13px;
+      color: #38bdf8;
+      max-height: 360px;
+    }
+
+    footer {
+      margin-top: 30px;
+      color: #64748b;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 800px) {
+      .grid, .diag-meta {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 450px) {
+      body {
+        padding: 14px;
+      }
+      .grid, .diag-meta {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="notice-banner">
+      <strong>Mode Audit Legacy Firebase:</strong> Halaman ini memperbaiki bug versi CDN SDK pada file lama
+      (<code>13.4.0</code> &rarr; <code>10.14.1</code>) untuk memverifikasi apakah ESP32 saat ini masih mengirim data ke
+      <code>kendali-akuisisi-data-default-rtdb.firebaseio.com</code>. Untuk dashboard utama 6 halaman &amp; migrasi Supabase, buka
+      <a href="./index.html" style="color: #38bdf8; font-weight: bold;">index.html</a>.
+    </div>
+
+    <header>
+      <div>
+        <h1>POWER HOUSE MONITORING (AUDIT FIREBASE)</h1>
+        <p>Diagnostik Real-Time Node <code>panel/telemetry</code> &bull; Firebase JS SDK v10.14.1</p>
+      </div>
+      <div class="status" id="connection">Menghubungkan ke Firebase...</div>
+    </header>
+
+    <h2 class="section-title">Monitoring Temperatur &amp; Koneksi</h2>
+    <div class="grid">
+      <div class="card">
+        <p>Suhu Udara</p>
+        <div class="value" id="air">--</div>
+        <span class="unit">&deg;C | DHT22</span>
+      </div>
+      <div class="card">
+        <p>Suhu Panel</p>
+        <div class="value" id="panel">--</div>
+        <span class="unit">&deg;C | DS18B20</span>
+      </div>
+      <div class="card">
+        <p>Kelembapan</p>
+        <div class="value" id="humidity">--</div>
+        <span class="unit">%</span>
+      </div>
+      <div class="card">
+        <p>WiFi ESP32</p>
+        <div class="value" id="wifi">--</div>
+        <span class="unit">Status koneksi</span>
+      </div>
+    </div>
+
+    <h2 class="section-title">Monitoring Kelistrikan</h2>
+    <div class="grid">
+      <div class="card">
+        <p>Tegangan</p>
+        <div class="value" id="voltage">--</div>
+        <span class="unit">Volt (opsional di JSON lama)</span>
+      </div>
+      <div class="card">
+        <p>Arus</p>
+        <div class="value" id="current">--</div>
+        <span class="unit">Ampere</span>
+      </div>
+      <div class="card">
+        <p>Daya</p>
+        <div class="value" id="power">--</div>
+        <span class="unit">Watt</span>
+      </div>
+      <div class="card">
+        <p>Energi</p>
+        <div class="value" id="energy">--</div>
+        <span class="unit">kWh</span>
+      </div>
+      <div class="card">
+        <p>Frekuensi</p>
+        <div class="value" id="frequency">--</div>
+        <span class="unit">Hz</span>
+      </div>
+      <div class="card">
+        <p>Power Factor</p>
+        <div class="value" id="pf">--</div>
+        <span class="unit">Cos &phi;</span>
+      </div>
+      <div class="card">
+        <p>Mode Kendali</p>
+        <div class="value" id="mode">--</div>
+        <span class="unit">AUTO / MANUAL</span>
+      </div>
+      <div class="card">
+        <p>Waktu Operasi</p>
+        <div class="value" id="uptime">--</div>
+        <span class="unit">Detik</span>
+      </div>
+    </div>
+
+    <h2 class="section-title">Status Aktuator</h2>
+    <div class="output">
+      <span>Kipas AC</span>
+      <span class="badge off" id="fan">OFF</span>
+    </div>
+    <div class="output">
+      <span>AC Split</span>
+      <span class="badge off" id="ac">OFF</span>
+    </div>
+    <div class="output">
+      <span>Buzzer</span>
+      <span class="badge off" id="buzzer">OFF</span>
+    </div>
+    <div class="output">
+      <span>Lampu</span>
+      <span class="badge off" id="lamp">OFF</span>
+    </div>
+
+    <section class="diag-panel">
+      <h2 class="section-title" style="margin-top: 0;">Panel Diagnostik Payload JSON Firebase</h2>
+      <div class="diag-meta">
+        <div>
+          <span>Status Autentikasi</span>
+          <strong id="diagAuth">Menunggu...</strong>
+        </div>
+        <div>
+          <span>Path Node RTDB</span>
+          <strong>panel/telemetry</strong>
+        </div>
+        <div>
+          <span>Pembaruan Terakhir</span>
+          <strong id="lastUpdate">Menunggu paket data...</strong>
+        </div>
+      </div>
+      <pre id="rawJson">{ "status": "Menunggu respons dari Firebase RTDB..." }</pre>
+    </section>
+
+    <footer>
+      Smart Industrial Power House Monitoring System &bull; Firebase Legacy Diagnostic Tool
+    </footer>
+  </div>
+
+  <script type="module">
+    // Menggunakan Firebase JS SDK v10.14.1 yang valid di CDN gstatic (menggantikan 13.4.0 yang 404)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDVroHlxiu8K5kjnQDZKtffHLshoFBuaUo",
+      authDomain: "kendali-akuisisi-data.firebaseapp.com",
+      databaseURL: "https://kendali-akuisisi-data-default-rtdb.firebaseio.com/",
+      projectId: "kendali-akuisisi-data",
+      storageBucket: "kendali-akuisisi-data.firebasestorage.app",
+      messagingSenderId: "287175064493",
+      appId: "1:287175064493:web:0a4357804b502070ddff24"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    const connEl = document.getElementById("connection");
+    const authEl = document.getElementById("diagAuth");
+    const rawJsonEl = document.getElementById("rawJson");
+
+    function show(id, value) {
+      document.getElementById(id).textContent = value ?? "--";
+    }
+
+    function outputStatus(id, value) {
+      const el = document.getElementById(id);
+      const isOn = value === true;
+      el.textContent = isOn ? "ON" : "OFF";
+      el.className = "badge " + (isOn ? "on" : "off");
+    }
+
+    function setConnectionStatus(text, stateClass) {
+      connEl.textContent = text;
+      connEl.className = "status " + (stateClass || "");
+    }
+
+    signInAnonymously(auth)
+      .then((cred) => {
+        authEl.textContent = "Anonymous UID: " + cred.user.uid.slice(0, 10) + "...";
+        setConnectionStatus("● Firebase Terhubung", "connected");
+
+        const telemetryRef = ref(db, "panel/telemetry");
+        onValue(
+          telemetryRef,
+          (snapshot) => {
+            const data = snapshot.val();
+            rawJsonEl.textContent = JSON.stringify(data, null, 2) || "null";
+
+            if (!data) {
+              setConnectionStatus("Node panel/telemetry kosong", "error");
+              return;
+            }
+
+            show("air", data.temperature?.air);
+            show("panel", data.temperature?.panel);
+            show("humidity", data.humidity);
+            show("wifi", data.wifiConnected ? "ONLINE" : "OFFLINE");
+
+            const electrical = data.electrical || {};
+            show("voltage", electrical.voltage ?? "N/A");
+            show("current", electrical.current);
+            show("power", electrical.power);
+            show("energy", electrical.energy);
+            show("frequency", electrical.frequency);
+            show("pf", electrical.powerFactor);
+
+            const output = data.output || {};
+            outputStatus("fan", output.fan);
+            outputStatus("ac", output.ac);
+            outputStatus("buzzer", output.buzzer);
+            outputStatus("lamp", output.lamp);
+
+            show("mode", data.mode);
+            show("uptime", data.uptimeSeconds);
+            show("lastUpdate", new Date().toLocaleTimeString("id-ID"));
+
+            setConnectionStatus("● Firebase Terhubung (Data Diterima)", "connected");
+          },
+          (error) => {
+            setConnectionStatus("Gagal membaca database: " + error.code, "error");
+            rawJsonEl.textContent = JSON.stringify({ error: error.code, message: error.message }, null, 2);
+            console.error("Firebase DB Error:", error);
+          }
+        );
+      })
+      .catch((error) => {
+        authEl.textContent = "Gagal: " + error.code;
+        setConnectionStatus("Autentikasi gagal: " + error.code, "error");
+        rawJsonEl.textContent = JSON.stringify({ error: error.code, message: error.message }, null, 2);
+        console.error("Firebase Auth Error:", error);
+      });
+  </script>
+</body>
+</html>
