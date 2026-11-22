@@ -230,12 +230,12 @@ function initCharts() {
   charts.elPower = createLineChart(
     "electricalPowerChart",
     [
-      { label: "Daya (W)", data: [], borderColor: "#10b981", backgroundColor: "rgba(16,185,129,0.15)", tension: 0.3, yAxisID: "y" },
-      { label: "Arus (A)", data: [], borderColor: "#06b6d4", tension: 0.3, yAxisID: "y1" }
+      { label: "Daya (W)", data: [], borderColor: "#24c48e", backgroundColor: "rgba(36,196,142,0.14)", tension: 0.3, yAxisID: "y" },
+      { label: "Arus (A)", data: [], borderColor: "#00b0ff", tension: 0.3, yAxisID: "y1" }
     ],
     {
-      y: { position: "left", ticks: { color: "#10b981" }, grid: { color: "rgba(148,163,184,0.1)" } },
-      y1: { position: "right", ticks: { color: "#06b6d4" }, grid: { drawOnChartArea: false } }
+      y: { position: "left", ticks: { color: "#24c48e" }, grid: { color: "rgba(148,163,184,0.08)" } },
+      y1: { position: "right", ticks: { color: "#00b0ff" }, grid: { drawOnChartArea: false } }
     }
   );
 
@@ -457,10 +457,10 @@ function updateHeartbeatBadge() {
 
   if (ageSec <= 15 && appState.telemetry.wifi_connected) {
     badge.className = "pill pill-online";
-    badge.textContent = `● ESP32: ONLINE (${ageSec}d lalu)`;
+    badge.textContent = `ESP32: ONLINE (${ageSec}d lalu)`;
   } else {
     badge.className = "pill pill-offline";
-    badge.textContent = ageSec > 3600 ? "● ESP32: OFFLINE" : `● ESP32: OFFLINE (${ageSec}d lalu)`;
+    badge.textContent = ageSec > 3600 ? "ESP32: OFFLINE" : `ESP32: OFFLINE (${ageSec}d lalu)`;
   }
 }
 
@@ -471,18 +471,18 @@ function evaluateAlerts() {
   if (!banner || !iconEl || !textEl) return;
 
   const tp = Number(appState.telemetry.temp_panel) || 0;
-  const alarmTh = Number(appState.config.temp_threshold_alarm) || 45;
+  const alarmTh = Number(appState.config.temp_threshold_alarm) || 40;
   const lastMs = new Date(appState.telemetry.last_seen_at).getTime();
   const offline = !Number.isFinite(lastMs) || Date.now() - lastMs > 15000;
 
   if (tp >= alarmTh) {
     banner.className = "alert-banner";
-    iconEl.textContent = "🔥";
-    textEl.textContent = `PERINGATAN OVERHEAT: Suhu panel mencapai ${tp.toFixed(1)}°C (Batas darurat ${alarmTh}°C). Sistem fail-safe aktif!`;
+    iconEl.textContent = "OVERHEAT";
+    textEl.textContent = `Suhu panel mencapai ${tp.toFixed(1)}°C (Batas darurat ${alarmTh}°C). Sistem proteksi aktif.`;
   } else if (offline && appState.settings.mode !== "simulator") {
     banner.className = "alert-banner warning";
-    iconEl.textContent = "📡";
-    textEl.textContent = "Koneksi ESP32 tidak mengirim heartbeat lebih dari 15 detik. Periksa catu daya atau jaringan WiFi panel.";
+    iconEl.textContent = "OFFLINE";
+    textEl.textContent = "ESP32 tidak mengirim pembaruan lebih dari 15 detik. Periksa catu daya atau jaringan WiFi panel.";
   } else {
     banner.className = "alert-banner hidden";
   }

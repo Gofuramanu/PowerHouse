@@ -2,14 +2,14 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#111827">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#12161f">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Power House IoT — Monitoring &amp; Control Panel Listrik ESP32</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="./assets/icon.svg">
+  <link rel="apple-touch-icon" href="./assets/icon-192.png">
   <link rel="stylesheet" href="./css/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
 </head>
@@ -18,40 +18,44 @@
     <!-- Sidebar Backdrop (Mobile) -->
     <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
 
-    <!-- SIDEBAR NAVIGATION -->
+    <!-- SIDEBAR NAVIGATION (DESKTOP & DRAWER) -->
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-logo">⚡</div>
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
         <div>
           <h1>POWER HOUSE</h1>
-          <span>ESP32 IoT Panel Control</span>
+          <span>IoT Panel Telemetry</span>
         </div>
       </div>
 
       <nav class="sidebar-nav" aria-label="Navigasi Dashboard">
-        <button class="nav-item active" data-page="overview">
-          <span class="nav-icon">📊</span>
-          <span>1. Overview</span>
+        <button class="nav-item active" data-page="overview" type="button">
+          <svg class="nav-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect></svg>
+          <span>Overview</span>
         </button>
-        <button class="nav-item" data-page="electrical">
-          <span class="nav-icon">⚡</span>
-          <span>2. Electrical Monitoring</span>
+        <button class="nav-item" data-page="electrical" type="button">
+          <svg class="nav-svg" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <span>Electrical Monitoring</span>
         </button>
-        <button class="nav-item" data-page="environment">
-          <span class="nav-icon">🌡️</span>
-          <span>3. Environment Monitoring</span>
+        <button class="nav-item" data-page="environment" type="button">
+          <svg class="nav-svg" viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></svg>
+          <span>Environment Monitoring</span>
         </button>
-        <button class="nav-item" data-page="control">
-          <span class="nav-icon">🎛️</span>
-          <span>4. Device Control</span>
+        <button class="nav-item" data-page="control" type="button">
+          <svg class="nav-svg" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+          <span>Device Control</span>
         </button>
-        <button class="nav-item" data-page="history">
-          <span class="nav-icon">📈</span>
-          <span>5. History &amp; Analytics</span>
+        <button class="nav-item" data-page="history" type="button">
+          <svg class="nav-svg" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          <span>History &amp; Analytics</span>
         </button>
-        <button class="nav-item" data-page="settings">
-          <span class="nav-icon">⚙️</span>
-          <span>6. Settings</span>
+        <button class="nav-item" data-page="settings" type="button">
+          <svg class="nav-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Settings</span>
         </button>
       </nav>
 
@@ -61,38 +65,46 @@
           <strong id="sidebarDeviceId">panel-utama-01</strong>
         </div>
         <a href="./firebase-legacy-test.html" class="legacy-link" target="_blank" rel="noopener">
-          🔍 Buka Alat Audit Firebase Lama
+          Diagnostik Firebase RTDB
         </a>
       </div>
     </aside>
 
     <!-- MAIN WORKSPACE -->
     <div class="main-area">
-      <!-- TOPBAR -->
+      <!-- TOPBAR (BLYNK APP HEADER) -->
       <header class="topbar">
-        <div class="topbar-left">
-          <button id="menuToggleBtn" class="menu-toggle" aria-label="Buka Menu">☰</button>
-          <div>
-            <h2 id="pageTitle">Overview Sistem</h2>
-            <p id="pageSubtitle" class="topbar-subtitle">Ringkasan status kelistrikan, suhu panel, dan aktuator secara real-time</p>
+        <div class="topbar-main-row">
+          <div class="topbar-left">
+            <button id="menuToggleBtn" class="menu-toggle" type="button" aria-label="Buka Menu">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+            <div>
+              <h2 id="pageTitle">Overview Sistem</h2>
+              <p id="pageSubtitle" class="topbar-subtitle">Ringkasan kondisi kelistrikan, termal panel, koneksi ESP32, dan status aktuator</p>
+            </div>
           </div>
-        </div>
 
-        <div class="topbar-badges">
-          <button id="installAppBtn" class="pill pill-install" type="button">
-            📲 Install Aplikasi
-          </button>
-          <span id="backendBadge" class="pill pill-info">Mode: Firebase ESP32</span>
-          <span id="heartbeatBadge" class="pill pill-offline">● ESP32: Menunggu</span>
-          <button id="authActionBtn" class="pill pill-auth" type="button">
-            👤 <span id="userRoleLabel">Operator</span>
-          </button>
+          <div class="topbar-badges">
+            <span id="heartbeatBadge" class="pill pill-offline">ESP32: Menunggu</span>
+            <span id="backendBadge" class="pill pill-info">Mode: Firebase Legacy</span>
+            <button id="authActionBtn" class="pill pill-auth" type="button">
+              <span id="userRoleLabel">Operator</span>
+            </button>
+            <button id="installAppBtn" class="pill pill-install" type="button">
+              Install Aplikasi
+            </button>
+          </div>
         </div>
       </header>
 
       <!-- ALERT BANNER -->
       <div id="alertBanner" class="alert-banner hidden" role="alert">
-        <span id="alertBannerIcon">⚠️</span>
+        <span id="alertBannerIcon" class="alert-tag">ALERT</span>
         <div id="alertBannerText">Peringatan Sistem</div>
       </div>
 
@@ -102,9 +114,9 @@
         <section id="page-overview" class="page active">
           <div class="status-strip">
             <div class="strip-item">
-              <span class="strip-label">Status Koneksi ESP32</span>
+              <span class="strip-label">Koneksi ESP32</span>
               <strong id="ovWifiStatus">--</strong>
-              <small id="ovLastSeen">Pembaruan: --</small>
+              <small id="ovLastSeen">Update: --</small>
             </div>
             <div class="strip-item">
               <span class="strip-label">Mode Operasi</span>
@@ -112,61 +124,61 @@
               <small id="ovModeHint">Sinkronisasi kontrol</small>
             </div>
             <div class="strip-item">
-              <span class="strip-label">Waktu Operasi (Uptime)</span>
+              <span class="strip-label">Waktu Operasi</span>
               <strong id="ovUptime">--</strong>
-              <small>Berjalan nonstop</small>
+              <small>Uptime perangkat</small>
             </div>
             <div class="strip-item">
-              <span class="strip-label">Kesehatan Termal Panel</span>
+              <span class="strip-label">Status Termal</span>
               <strong id="ovThermalHealth">--</strong>
-              <small id="ovThermalDelta">ΔT Panel-Udara: --</small>
+              <small id="ovThermalDelta">Delta Panel-Udara: --</small>
             </div>
           </div>
 
-          <h3 class="section-heading">Ringkasan Kelistrikan Real-Time</h3>
+          <h3 class="section-heading">Telemetry Kelistrikan</h3>
           <div class="grid-cards cols-3">
-            <div class="metric-card">
-              <span class="metric-label">⚡ Tegangan (Voltage)</span>
+            <div class="metric-card accent-blue">
+              <span class="metric-label">Tegangan (Voltage)</span>
               <div class="metric-value"><span id="ovVoltage">--</span> <small>V</small></div>
-              <span class="metric-foot">Jala-jala AC</span>
+              <span class="metric-foot">Tegangan AC</span>
             </div>
-            <div class="metric-card">
-              <span class="metric-label">🔌 Arus Beban (Current)</span>
+            <div class="metric-card accent-cyan">
+              <span class="metric-label">Arus Beban (Current)</span>
               <div class="metric-value"><span id="ovCurrent">--</span> <small>A</small></div>
-              <span class="metric-foot">Beban panel saat ini</span>
+              <span class="metric-foot">Arus beban panel</span>
             </div>
-            <div class="metric-card">
-              <span class="metric-label">💡 Daya Aktif (Power)</span>
+            <div class="metric-card accent-emerald">
+              <span class="metric-label">Daya Aktif (Power)</span>
               <div class="metric-value"><span id="ovPower">--</span> <small>W</small></div>
-              <span class="metric-foot">Konsumsi sesaat</span>
+              <span class="metric-foot">Daya sesaat</span>
             </div>
             <div class="metric-card">
-              <span class="metric-label">🔋 Energi Terpakai</span>
+              <span class="metric-label">Energi Terpakai</span>
               <div class="metric-value"><span id="ovEnergy">--</span> <small>kWh</small></div>
-              <span class="metric-foot">Akumulasi meter</span>
+              <span class="metric-foot">Akumulasi kWh</span>
             </div>
             <div class="metric-card">
-              <span class="metric-label">〰️ Frekuensi</span>
+              <span class="metric-label">Frekuensi</span>
               <div class="metric-value"><span id="ovFrequency">--</span> <small>Hz</small></div>
-              <span class="metric-foot">Standar PLN 50 Hz</span>
+              <span class="metric-foot">Standar 50 Hz</span>
             </div>
             <div class="metric-card">
-              <span class="metric-label">📊 Power Factor</span>
-              <div class="metric-value"><span id="ovPf">--</span> <small>Cos φ</small></div>
+              <span class="metric-label">Power Factor</span>
+              <div class="metric-value"><span id="ovPf">--</span> <small>Cos phi</small></div>
               <span class="metric-foot">Efisiensi daya</span>
             </div>
           </div>
 
           <div class="two-col-layout">
             <div class="panel-box">
-              <h3 class="box-title">Kondisi Lingkungan Panel</h3>
+              <h3 class="box-title">Lingkungan Panel</h3>
               <div class="env-mini-grid">
                 <div class="env-mini">
-                  <span>Suhu Panel (DS18B20)</span>
+                  <span>Suhu Panel</span>
                   <strong id="ovTempPanel">-- °C</strong>
                 </div>
                 <div class="env-mini">
-                  <span>Suhu Udara (DHT22)</span>
+                  <span>Suhu Udara</span>
                   <strong id="ovTempAir">-- °C</strong>
                 </div>
                 <div class="env-mini">
@@ -175,22 +187,22 @@
                 </div>
               </div>
 
-              <h3 class="box-title" style="margin-top: 20px;">Status Output Aktuator</h3>
+              <h3 class="box-title" style="margin-top: 18px;">Status Output Aktuator</h3>
               <div class="actuator-pills">
                 <div class="actuator-pill">
-                  <span>🌀 Kipas AC</span>
+                  <span>Kipas Panel</span>
                   <span id="ovFanBadge" class="state-badge off">OFF</span>
                 </div>
                 <div class="actuator-pill">
-                  <span>❄️ AC Split</span>
+                  <span>AC Split</span>
                   <span id="ovAcBadge" class="state-badge off">OFF</span>
                 </div>
                 <div class="actuator-pill">
-                  <span>🔔 Buzzer</span>
+                  <span>Buzzer Alarm</span>
                   <span id="ovBuzzerBadge" class="state-badge off">OFF</span>
                 </div>
                 <div class="actuator-pill">
-                  <span>💡 Lampu</span>
+                  <span>Lampu Indikator</span>
                   <span id="ovLampBadge" class="state-badge off">OFF</span>
                 </div>
               </div>
@@ -198,8 +210,8 @@
 
             <div class="panel-box">
               <div class="box-header-row">
-                <h3 class="box-title">Aktivitas Terbaru</h3>
-                <button class="btn-link" data-goto="history">Lihat Semua &rarr;</button>
+                <h3 class="box-title">Log Aktivitas</h3>
+                <button class="btn-link" data-goto="history" type="button">Lihat Semua</button>
               </div>
               <ul id="overviewActivityList" class="activity-feed">
                 <li class="empty-note">Menunggu data aktivitas sistem...</li>
@@ -216,26 +228,26 @@
                 <span class="metric-label">Tegangan Listrik</span>
                 <span id="elVoltageQuality" class="quality-tag">--</span>
               </div>
-              <div class="metric-value"><span id="elVoltage">--</span> <small>Volt</small></div>
-              <span class="metric-foot">Rentang aman: 207V – 242V</span>
+              <div class="metric-value"><span id="elVoltage">--</span> <small>V</small></div>
+              <span class="metric-foot">Rentang normal: 207V – 242V</span>
             </div>
 
             <div class="metric-card accent-cyan">
               <div class="card-top-row">
                 <span class="metric-label">Arus Listrik</span>
-                <span class="quality-tag neutral">Sensor PZEM-004T</span>
+                <span class="quality-tag neutral">PZEM-004T</span>
               </div>
-              <div class="metric-value"><span id="elCurrent">--</span> <small>Ampere</small></div>
+              <div class="metric-value"><span id="elCurrent">--</span> <small>A</small></div>
               <span class="metric-foot">Daya Semu: <strong id="elApparentPower">--</strong> VA</span>
             </div>
 
             <div class="metric-card accent-emerald">
               <div class="card-top-row">
                 <span class="metric-label">Daya Aktif</span>
-                <span class="quality-tag neutral">Real-Time</span>
+                <span class="quality-tag neutral">Live</span>
               </div>
-              <div class="metric-value"><span id="elPower">--</span> <small>Watt</small></div>
-              <span class="metric-foot">Akumulasi Energi: <strong id="elEnergy">--</strong> kWh</span>
+              <div class="metric-value"><span id="elPower">--</span> <small>W</small></div>
+              <span class="metric-foot">Energi: <strong id="elEnergy">--</strong> kWh</span>
             </div>
 
             <div class="metric-card">
@@ -244,25 +256,25 @@
                 <span id="elFreqQuality" class="quality-tag">--</span>
               </div>
               <div class="metric-value"><span id="elFrequency">--</span> <small>Hz</small></div>
-              <span class="metric-foot">Toleransi standar: 49.5 – 50.5 Hz</span>
+              <span class="metric-foot">Toleransi: 49.5 – 50.5 Hz</span>
             </div>
 
             <div class="metric-card">
               <div class="card-top-row">
-                <span class="metric-label">Power Factor (Cos φ)</span>
+                <span class="metric-label">Power Factor</span>
                 <span id="elPfQuality" class="quality-tag">--</span>
               </div>
               <div class="metric-value"><span id="elPf">--</span></div>
-              <span class="metric-foot">Ideal industri: &ge; 0.85</span>
+              <span class="metric-foot">Target efisiensi &ge; 0.85</span>
             </div>
 
             <div class="metric-card">
               <div class="card-top-row">
-                <span class="metric-label">Estimasi Biaya Sesi</span>
-                <span class="quality-tag neutral">Tarif ~Rp 1.445/kWh</span>
+                <span class="metric-label">Estimasi Biaya</span>
+                <span class="quality-tag neutral">Rp 1.445/kWh</span>
               </div>
               <div class="metric-value"><span id="elEstCost">Rp --</span></div>
-              <span class="metric-foot">Berdasarkan total kWh terbaca</span>
+              <span class="metric-foot">Akumulasi energi terbaca</span>
             </div>
           </div>
 
@@ -285,45 +297,45 @@
         <!-- ==================== HALAMAN 3: ENVIRONMENT MONITORING ==================== -->
         <section id="page-environment" class="page">
           <div class="grid-cards cols-4">
-            <div class="metric-card">
+            <div class="metric-card accent-emerald">
               <div class="card-top-row">
                 <span class="metric-label">Suhu Panel (DS18B20)</span>
                 <span id="envPanelZone" class="quality-tag">--</span>
               </div>
               <div class="metric-value"><span id="envTempPanel">--</span> <small>&deg;C</small></div>
-              <span class="metric-foot">Batas Kipas: <strong id="envThFan">32</strong>&deg;C | Alarm: <strong id="envThAlarm">45</strong>&deg;C</span>
+              <span class="metric-foot">Kipas: <strong id="envThFan">30</strong>&deg;C | Alarm: <strong id="envThAlarm">40</strong>&deg;C</span>
             </div>
 
-            <div class="metric-card">
+            <div class="metric-card accent-blue">
               <div class="card-top-row">
                 <span class="metric-label">Suhu Udara (DHT22)</span>
-                <span class="quality-tag neutral">Ruang Panel</span>
+                <span class="quality-tag neutral">Ambient</span>
               </div>
               <div class="metric-value"><span id="envTempAir">--</span> <small>&deg;C</small></div>
-              <span class="metric-foot">Batas AC Split: <strong id="envThAc">35</strong>&deg;C</span>
+              <span class="metric-foot">AC Split: <strong id="envThAc">35</strong>&deg;C</span>
             </div>
 
-            <div class="metric-card">
+            <div class="metric-card accent-cyan">
               <div class="card-top-row">
-                <span class="metric-label">Kelembapan Relatif</span>
+                <span class="metric-label">Kelembapan Udara</span>
                 <span id="envHumidityZone" class="quality-tag">--</span>
               </div>
               <div class="metric-value"><span id="envHumidity">--</span> <small>%</small></div>
-              <span class="metric-foot">Ideal panel listrik: 40% – 70%</span>
+              <span class="metric-foot">Rentang ideal: 40% – 70%</span>
             </div>
 
             <div class="metric-card">
               <div class="card-top-row">
-                <span class="metric-label">Selisih Termal (ΔT)</span>
+                <span class="metric-label">Selisih Termal</span>
                 <span class="quality-tag neutral">Panel - Udara</span>
               </div>
               <div class="metric-value"><span id="envDeltaTemp">--</span> <small>&deg;C</small></div>
-              <span class="metric-foot">Indikasi pemanasan komponen internal</span>
+              <span class="metric-foot">Indikator panas internal</span>
             </div>
           </div>
 
-          <div class="panel-box chart-box" style="margin-top: 18px;">
-            <h3 class="box-title">Tren Suhu Panel, Suhu Udara &amp; Kelembapan (Real-Time)</h3>
+          <div class="panel-box chart-box" style="margin-top: 16px;">
+            <h3 class="box-title">Tren Suhu Panel, Suhu Udara &amp; Kelembapan</h3>
             <div class="chart-wrapper tall">
               <canvas id="environmentChart"></canvas>
             </div>
@@ -333,15 +345,15 @@
         <!-- ==================== HALAMAN 4: DEVICE CONTROL ==================== -->
         <section id="page-control" class="page">
           <div id="controlGuardBanner" class="info-banner hidden">
-            🔒 <strong>Mode Read-Only:</strong> Akun Anda berstatus <em>Viewer</em> atau belum login sebagai Admin/Operator. Tombol kontrol dikunci demi keamanan.
+            <strong>Mode Read-Only:</strong> Akun Anda berstatus <em>Viewer</em> atau belum login sebagai Admin/Operator. Tombol kontrol dikunci.
           </div>
 
           <div class="panel-box control-mode-card">
             <div>
-              <h3>Mode Operasi Kendali Panel</h3>
+              <h3>Mode Kendali Sistem</h3>
               <p class="muted-text">
-                <strong>AUTO:</strong> ESP32 mengatur Kipas, AC, dan Buzzer secara otomatis berdasarkan ambang batas suhu dan tetap aman saat internet terputus.<br>
-                <strong>MANUAL:</strong> Operator memegang kendali langsung aktuator melalui dashboard (proteksi darurat overheat tetap aktif di ESP32).
+                <strong>AUTO:</strong> ESP32 mengendalikan Kipas dan AC otomatis berdasarkan suhu panel.<br>
+                <strong>MANUAL:</strong> Kendali langsung Kipas dan AC melalui switch di bawah.
               </p>
             </div>
             <div class="mode-switch-group">
@@ -350,72 +362,72 @@
             </div>
           </div>
 
-          <div class="grid-cards cols-2" style="margin-top: 18px;">
+          <div class="grid-cards cols-2" style="margin-top: 16px;">
             <div class="control-card">
               <div class="control-head">
                 <div>
-                  <h4>🌀 Kipas Pendingin Panel (GPIO 25)</h4>
-                  <p>AUTO: ON &ge; 30&deg;C, OFF &le; 28&deg;C &bull; MANUAL: Kendali via <code>/panel/control/fan</code></p>
+                  <h4>Kipas Pendingin Panel (GPIO 25)</h4>
+                  <p>AUTO: ON &ge; 30&deg;C, OFF &le; 28&deg;C &bull; MANUAL: <code>/panel/control/fan</code></p>
                 </div>
-                <label class="switch">
+                <label class="switch" aria-label="Kontrol Kipas">
                   <input type="checkbox" id="ctrlFan">
                   <span class="slider"></span>
                 </label>
               </div>
               <div class="control-sync-meta">
-                <span>Target Perintah: <strong id="targetFanText">--</strong></span>
-                <span>Status Aktual ESP32: <strong id="actualFanText">--</strong></span>
+                <span>Target: <strong id="targetFanText">--</strong></span>
+                <span>Aktual ESP32: <strong id="actualFanText">--</strong></span>
               </div>
             </div>
 
             <div class="control-card">
               <div class="control-head">
                 <div>
-                  <h4>❄️ AC Split Power House (GPIO 26)</h4>
-                  <p>AUTO: ON &ge; 35&deg;C, OFF &le; 32&deg;C &bull; Proteksi jeda restart kompresor 180 detik</p>
+                  <h4>AC Split Power House (GPIO 26)</h4>
+                  <p>AUTO: ON &ge; 35&deg;C, OFF &le; 32&deg;C &bull; Jeda proteksi kompresor 180 detik</p>
                 </div>
-                <label class="switch">
+                <label class="switch" aria-label="Kontrol AC Split">
                   <input type="checkbox" id="ctrlAc">
                   <span class="slider"></span>
                 </label>
               </div>
               <div class="control-sync-meta">
-                <span>Target Perintah: <strong id="targetAcText">--</strong></span>
-                <span>Status Aktual ESP32: <strong id="actualAcText">--</strong></span>
+                <span>Target: <strong id="targetAcText">--</strong></span>
+                <span>Aktual ESP32: <strong id="actualAcText">--</strong></span>
               </div>
             </div>
 
             <div class="control-card">
               <div class="control-head">
                 <div>
-                  <h4>🔔 Buzzer Alarm Overheat (GPIO 27)</h4>
+                  <h4>Buzzer Alarm Overheat (GPIO 27)</h4>
                   <p>Aktif otomatis (Transistor BC547 Active-HIGH) saat suhu panel &ge; 40&deg;C</p>
                 </div>
-                <label class="switch">
+                <label class="switch" aria-label="Status Buzzer">
                   <input type="checkbox" id="ctrlBuzzer">
                   <span class="slider"></span>
                 </label>
               </div>
               <div class="control-sync-meta">
-                <span>Target Perintah: <strong id="targetBuzzerText">--</strong></span>
-                <span>Status Aktual ESP32: <strong id="actualBuzzerText">--</strong></span>
+                <span>Mode: <strong id="targetBuzzerText">--</strong></span>
+                <span>Aktual ESP32: <strong id="actualBuzzerText">--</strong></span>
               </div>
             </div>
 
             <div class="control-card">
               <div class="control-head">
                 <div>
-                  <h4>💡 Lampu Indikator Beban (GPIO 14)</h4>
+                  <h4>Lampu Indikator Beban (GPIO 14)</h4>
                   <p>Menyala otomatis (Active-HIGH) saat Kipas atau AC sedang beroperasi</p>
                 </div>
-                <label class="switch">
+                <label class="switch" aria-label="Status Lampu Indikator">
                   <input type="checkbox" id="ctrlLamp">
                   <span class="slider"></span>
                 </label>
               </div>
               <div class="control-sync-meta">
-                <span>Target Perintah: <strong id="targetLampText">--</strong></span>
-                <span>Status Aktual ESP32: <strong id="actualLampText">--</strong></span>
+                <span>Mode: <strong id="targetLampText">--</strong></span>
+                <span>Aktual ESP32: <strong id="actualLampText">--</strong></span>
               </div>
             </div>
           </div>
@@ -446,15 +458,15 @@
                 <input type="date" id="historyEndDate" aria-label="Tanggal Selesai">
               </div>
 
-              <button id="btnLoadHistory" class="btn-primary" type="button">Muat Data Histori</button>
+              <button id="btnLoadHistory" class="btn-primary" type="button">Muat Histori</button>
             </div>
 
-            <button id="btnExportCsv" class="btn-secondary" type="button">⬇️ Export CSV</button>
+            <button id="btnExportCsv" class="btn-secondary" type="button">Export CSV</button>
           </div>
 
-          <div class="grid-cards cols-4" style="margin-top: 16px;">
+          <div class="grid-cards cols-4" style="margin-top: 14px;">
             <div class="metric-card">
-              <span class="metric-label">Daya Puncak (Peak Power)</span>
+              <span class="metric-label">Daya Puncak</span>
               <div class="metric-value"><span id="histPeakPower">--</span> <small>W</small></div>
             </div>
             <div class="metric-card">
@@ -462,11 +474,11 @@
               <div class="metric-value"><span id="histAvgTemp">--</span> <small>&deg;C</small></div>
             </div>
             <div class="metric-card">
-              <span class="metric-label">Konsumsi Energi Periode</span>
+              <span class="metric-label">Konsumsi Energi</span>
               <div class="metric-value"><span id="histDeltaEnergy">--</span> <small>kWh</small></div>
             </div>
             <div class="metric-card">
-              <span class="metric-label">Rata-rata Power Factor</span>
+              <span class="metric-label">Rata-rata PF</span>
               <div class="metric-value"><span id="histAvgPf">--</span></div>
             </div>
           </div>
@@ -486,8 +498,8 @@
             </div>
           </div>
 
-          <div class="panel-box" style="margin-top: 18px;">
-            <h3 class="box-title">Riwayat Aktivitas &amp; Perubahan Status Perangkat (Audit Trail)</h3>
+          <div class="panel-box" style="margin-top: 16px;">
+            <h3 class="box-title">Riwayat Aktivitas Perangkat</h3>
             <div class="table-scroll">
               <table class="data-table">
                 <thead>
@@ -495,7 +507,7 @@
                     <th>Waktu</th>
                     <th>Sumber</th>
                     <th>Aktor</th>
-                    <th>Jenis Kejadian</th>
+                    <th>Kejadian</th>
                     <th>Keterangan</th>
                   </tr>
                 </thead>
@@ -511,19 +523,19 @@
 
         <!-- ==================== HALAMAN 6: SETTINGS ==================== -->
         <section id="page-settings" class="page">
-          <div class="two-col-layout">
+          <div class="two-col-layout" style="margin-top: 0;">
             <form id="backendConfigForm" class="panel-box form-card">
               <h3 class="box-title">Koneksi Backend &amp; Sumber Data</h3>
               <p class="muted-text" style="margin-bottom: 14px;">
-                Pilih sumber backend aktif. Kredensial disimpan lokal di browser (hanya <code>Anon Public Key</code> yang aman untuk frontend; jangan pernah memasukkan <code>service_role</code> key).
+                Pilih sumber data aktif. Secara default terhubung ke Firebase milik ESP32 Anda.
               </p>
 
               <div class="form-group">
                 <label for="cfgBackendMode">Mode Sumber Data</label>
                 <select id="cfgBackendMode">
+                  <option value="firebase">Firebase RTDB (Langsung Sinkron ESP32)</option>
+                  <option value="supabase">Supabase Cloud (PostgreSQL + Realtime)</option>
                   <option value="simulator">Simulasi Interaktif (Demo / Offline Test)</option>
-                  <option value="supabase">Supabase Cloud (PostgreSQL + Realtime) — Rekomendasi</option>
-                  <option value="firebase">Firebase Legacy RTDB (Audit Perangkat Lama)</option>
                 </select>
               </div>
 
@@ -561,7 +573,7 @@
             <form id="thresholdForm" class="panel-box form-card">
               <h3 class="box-title">Ambang Batas Otomatisasi &amp; Logging</h3>
               <p class="muted-text" style="margin-bottom: 14px;">
-                Pengaturan ini disimpan ke tabel <code>panel_config</code> dan otomatis dikirim ke ESP32 setiap kali perangkat melakukan sinkronisasi.
+                Konfigurasi ambang batas temperatur untuk mode otomatis dan peringatan overheat.
               </p>
 
               <div class="form-group">
@@ -580,7 +592,7 @@
               </div>
 
               <div class="form-group">
-                <label for="cfgLogInterval">Interval Pencatatan Histori Database (Detik)</label>
+                <label for="cfgLogInterval">Interval Pencatatan Histori (Detik)</label>
                 <input type="number" step="5" min="5" max="3600" id="cfgLogInterval" value="60">
               </div>
 
@@ -590,10 +602,10 @@
             </form>
           </div>
 
-          <div class="panel-box" style="margin-top: 18px;">
+          <div class="panel-box" style="margin-top: 16px;">
             <div class="box-header-row">
               <div>
-                <h3 class="box-title">Sesi Pengguna &amp; Kontrol Akses (RBAC)</h3>
+                <h3 class="box-title">Sesi Pengguna &amp; Hak Akses</h3>
                 <p class="muted-text" id="settingsAuthSummary">Status login akan ditampilkan di sini.</p>
               </div>
               <div class="auth-buttons-row">
@@ -604,7 +616,7 @@
 
             <div id="simulatorLabBox" class="sim-lab-box">
               <strong>Panel Uji Simulasi (Aktif saat Mode Simulasi):</strong>
-              <span>Uji respons otomatis panel terhadap perubahan kondisi lapangan:</span>
+              <span>Uji respons otomatis panel terhadap perubahan temperatur:</span>
               <div class="sim-buttons">
                 <button id="btnSimNormal" class="btn-secondary" type="button">Kondisi Normal (28&deg;C)</button>
                 <button id="btnSimWarm" class="btn-secondary" type="button">Panel Hangat (36&deg;C)</button>
@@ -617,65 +629,65 @@
     </div>
   </div>
 
-  <!-- NAVIGASI BAWAH KHUSUS HP (MOBILE APP BAR) -->
+  <!-- NAVIGASI BAWAH KHUSUS HP (BLYNK MOBILE TAB BAR) -->
   <nav id="mobileBottomNav" class="mobile-bottom-nav" aria-label="Navigasi Cepat HP">
     <button class="mob-nav-item active" data-page="overview" type="button">
-      <span class="mob-icon">📊</span>
+      <svg class="mob-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect></svg>
       <span>Overview</span>
     </button>
     <button class="mob-nav-item" data-page="electrical" type="button">
-      <span class="mob-icon">⚡</span>
+      <svg class="mob-svg" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
       <span>Listrik</span>
     </button>
     <button class="mob-nav-item" data-page="environment" type="button">
-      <span class="mob-icon">🌡️</span>
+      <svg class="mob-svg" viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></svg>
       <span>Suhu</span>
     </button>
     <button class="mob-nav-item" data-page="control" type="button">
-      <span class="mob-icon">🎛️</span>
+      <svg class="mob-svg" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
       <span>Kontrol</span>
     </button>
     <button class="mob-nav-item" data-page="history" type="button">
-      <span class="mob-icon">📈</span>
+      <svg class="mob-svg" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
       <span>Histori</span>
     </button>
     <button class="mob-nav-item" data-page="settings" type="button">
-      <span class="mob-icon">⚙️</span>
+      <svg class="mob-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       <span>Settings</span>
     </button>
   </nav>
 
-  <!-- MODAL PANDUAN INSTALL APLIKASI (UNTUK MI BROWSER / SAFARI / IN-APP BROWSER) -->
+  <!-- MODAL PANDUAN INSTALL APLIKASI -->
   <div id="installGuideModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="installGuideTitle">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="installGuideTitle">📲 Pasang Aplikasi PowerHouse IoT</h3>
+        <h3 id="installGuideTitle">Install Aplikasi PowerHouse IoT</h3>
         <button id="closeInstallGuideBtn" class="icon-close" type="button" aria-label="Tutup">&times;</button>
       </div>
       <div class="install-guide-body">
-        <p class="muted-text" style="margin-bottom: 12px;">
-          Browser yang Anda gunakan saat ini tidak menampilkan pop-up instalasi otomatis. Pilih cara tercepat di bawah ini:
+        <p class="muted-text">
+          Browser saat ini tidak menampilkan dialog install otomatis. Gunakan salah satu langkah di bawah ini:
         </p>
 
         <div class="install-step-box">
-          <strong>Opsi 1: Buka Otomatis di Google Chrome (Disarankan)</strong>
-          <p>Tekan tombol di bawah untuk langsung berpindah ke Google Chrome lalu tekan <b>Install Aplikasi</b>:</p>
+          <strong>Opsi 1: Buka di Google Chrome (Android)</strong>
+          <p>Pindahkan halaman ke Google Chrome lalu ketuk tombol <b>Install Aplikasi</b>:</p>
           <button id="btnOpenInChrome" class="btn-primary" type="button" style="width: 100%; margin-top: 8px;">
-            🌐 Buka di Google Chrome Sekarang
+            Buka di Google Chrome
           </button>
         </div>
 
         <div class="install-step-box">
-          <strong>Opsi 2: Pasang Langsung dari Menu Browser Ini</strong>
+          <strong>Opsi 2: Pasang dari Menu Browser</strong>
           <ol class="install-steps-list">
-            <li>Ketuk tombol menu <b>☰</b> (kanan bawah) atau titik tiga <b>⋮</b> (kanan atas browser).</li>
-            <li>Pilih <b>"Tambahkan ke layar utama"</b> (<i>Add to Home screen</i>) atau <b>"Instal aplikasi"</b>.</li>
-            <li>Di iPhone (Safari): ketuk ikon <b>Share</b> &rarr; <b>Add to Home Screen</b>.</li>
+            <li>Ketuk ikon menu browser (garis tiga di kanan bawah atau titik tiga di kanan atas).</li>
+            <li>Pilih <b>Tambahkan ke layar utama</b> (<i>Add to Home screen</i>) atau <b>Instal aplikasi</b>.</li>
+            <li>Di iPhone (Safari): ketuk tombol <b>Share</b> lalu pilih <b>Add to Home Screen</b>.</li>
           </ol>
         </div>
 
         <button id="btnCopyAppLink" class="btn-secondary" type="button" style="width: 100%;">
-          📋 Salin Link Aplikasi
+          Salin Link Aplikasi
         </button>
       </div>
     </div>
