@@ -912,6 +912,7 @@ async function startSupabaseMode() {
       appState.user = null;
       appState.role = "viewer";
       renderAll();
+      updateAuthUI();
       openLoginModal();
     }
 
@@ -923,6 +924,7 @@ async function startSupabaseMode() {
         appState.role = "viewer";
         unsubscribeSupabaseRealtime();
         renderAll();
+        updateAuthUI();
       }
     });
   } catch (err) {
@@ -1479,22 +1481,42 @@ function bindEvents() {
 
   document.getElementById("supabaseLoginForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (!supabaseClient) return;
+    const errEl = document.getElementById("loginErrorMsg");
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (!supabaseClient) {
+      if (errEl) {
+        errEl.textContent = "Koneksi Supabase belum aktif. Simpan URL & Anon Key di Settings terlebih dahulu.";
+        errEl.classList.remove("hidden");
+      }
+      return;
+    }
+
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value;
-    const errEl = document.getElementById("loginErrorMsg");
 
-    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) {
-      errEl.textContent = "Login gagal: " + error.message;
-      errEl.classList.remove("hidden");
-    } else {
-      closeLoginModal();
+    if (submitBtn) submitBtn.disabled = true;
+    try {
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        if (errEl) {
+          errEl.textContent = "Login gagal: " + error.message;
+          errEl.classList.remove("hidden");
+        }
+      } else {
+        closeLoginModal();
+      }
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
     }
   });
 
   document.getElementById("btnLogoutSupabase")?.addEventListener("click", async () => {
     if (supabaseClient) await supabaseClient.auth.signOut();
+    appState.user = null;
+    appState.role = "viewer";
+    renderAll();
+    updateAuthUI();
+    openLoginModal();
   });
 
   // Toggle Dark Mode (Full Black) / Light Mode (Clean White)
