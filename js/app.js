@@ -418,9 +418,9 @@ function renderAll() {
   const wifiDot = document.getElementById("ovWifiDot");
   if (wifiDot) wifiDot.className = "led-pip " + (t.wifi_connected ? "green" : "red");
 
-  setText("ovLastSeen", "Update: " + formatTime(t.last_seen_at));
-  setText("ovMode", `Mode: ${t.actual_mode}`);
-  setText("ovModeHint", `Threshold ${formatNum(c.temp_threshold_alarm, 0)}°C`);
+  setText("ovLastSeen", formatTime(t.last_seen_at));
+  setText("ovMode", t.actual_mode);
+  setText("ovModeHint", `${formatNum(c.temp_threshold_alarm, 0)}°C`);
   setText("ovUptime", formatUptime(t.uptime_seconds));
 
   const deltaT = (Number(t.temp_panel) || 0) - (Number(t.temp_air) || 0);
@@ -516,11 +516,11 @@ function renderAll() {
 
 function renderTopbarBadges() {
   const modeMap = {
-    simulator: "Mode: Simulasi Interaktif",
-    supabase: "Mode: Supabase Cloud",
-    firebase: "Mode: Firebase Legacy"
+    simulator: "Simulasi",
+    supabase: "Supabase",
+    firebase: "Firebase"
   };
-  setText("backendBadge", modeMap[appState.settings.mode] || "Mode: Unknown");
+  setText("backendBadge", modeMap[appState.settings.mode] || "Unknown");
 
   if (appState.settings.mode === "simulator") {
     setText("userRoleLabel", "Demo Admin");
@@ -532,7 +532,7 @@ function renderTopbarBadges() {
     setText("userRoleLabel", "Belum Login");
   }
 
-  setText("topModeText", `${(appState.config.target_mode || "AUTO").toUpperCase()}\nMODE`);
+  setText("topModeText", (appState.config.target_mode || "AUTO").toUpperCase());
   updateHeartbeatBadge();
 }
 
@@ -603,8 +603,8 @@ function renderControlPage() {
   const bindings = [
     { inputs: ["ctrlFan", "ovCtrlFan"], targetText: "targetFanText", actualText: "actualFanText", targetVal: c.target_fan, actualVal: t.actual_fan, locked: !isManual },
     { inputs: ["ctrlAc", "ovCtrlAc"], targetText: "targetAcText", actualText: "actualAcText", targetVal: c.target_ac, actualVal: t.actual_ac, locked: !isManual },
-    { inputs: ["ctrlBuzzer", "ovCtrlBuzzer"], targetText: "targetBuzzerText", actualText: "actualBuzzerText", targetVal: t.actual_buzzer, actualVal: t.actual_buzzer, locked: true, customTarget: `AUTO (≥${c.temp_threshold_alarm}°C)` },
-    { inputs: ["ctrlLamp", "ovCtrlLamp"], targetText: "targetLampText", actualText: "actualLampText", targetVal: isFirebase ? t.actual_lamp : c.target_lamp, actualVal: t.actual_lamp, locked: isFirebase, customTarget: isFirebase ? "AUTO (Fan/AC)" : null }
+    { inputs: ["ctrlBuzzer", "ovCtrlBuzzer"], targetText: "targetBuzzerText", actualText: "actualBuzzerText", targetVal: t.actual_buzzer, actualVal: t.actual_buzzer, locked: true, customTarget: "AUTO" },
+    { inputs: ["ctrlLamp", "ovCtrlLamp"], targetText: "targetLampText", actualText: "actualLampText", targetVal: isFirebase ? t.actual_lamp : c.target_lamp, actualVal: t.actual_lamp, locked: isFirebase, customTarget: isFirebase ? "AUTO" : null }
   ];
 
   bindings.forEach((b) => {

@@ -31,7 +31,6 @@
         </div>
         <div>
           <h1>Power House Panel</h1>
-          <span>Luminescent Telemetry</span>
         </div>
       </div>
 
@@ -477,7 +476,7 @@
           <div class="panel-box hero-power-card">
             <div class="hero-power-top">
               <div>
-                <span class="micro-slug">DAYA AKTIF SESAAT (PZEM-004T)</span>
+                <span class="micro-slug">DAYA AKTIF SESAAT</span>
                 <div class="hero-power-reading">
                   <span id="elPower">--</span>
                   <small>W</small>
@@ -485,7 +484,6 @@
               </div>
               <div class="hero-power-meta-right">
                 <span id="elLoadPct" class="quality-tag good">LIVE LOAD</span>
-                <small class="micro-sub">Kapasitas 3500 W</small>
               </div>
             </div>
 
@@ -531,7 +529,6 @@
               <div class="tile-reading">
                 <span id="elVoltage">--</span> <small>V</small>
               </div>
-              <span class="micro-sub">Standar PLN: 207V – 242V</span>
             </div>
 
             <div class="blynk-metric-tile glow-cyan">
@@ -542,7 +539,6 @@
               <div class="tile-reading">
                 <span id="elCurrent">--</span> <small>A</small>
               </div>
-              <span class="micro-sub">Sensor PZEM-004T v3.0</span>
             </div>
 
             <div class="blynk-metric-tile glow-green">
@@ -553,7 +549,6 @@
               <div class="tile-reading">
                 <span id="elEnergy">--</span> <small>kWh</small>
               </div>
-              <span class="micro-sub">Tarif ~Rp 1.445 / kWh</span>
             </div>
 
             <div class="blynk-metric-tile glow-cyan">
@@ -564,7 +559,6 @@
               <div class="tile-reading">
                 <span id="elFrequency">--</span> <small>Hz</small>
               </div>
-              <span class="micro-sub">Toleransi: 49.5 – 50.5 Hz</span>
             </div>
 
             <div class="blynk-metric-tile glow-cyan">
@@ -575,7 +569,6 @@
               <div class="tile-reading">
                 <span id="elPf">--</span> <small>Cos φ</small>
               </div>
-              <span class="micro-sub">Target Efisiensi &ge; 0.85</span>
             </div>
 
             <div class="blynk-metric-tile glow-green">
@@ -586,7 +579,6 @@
               <div class="tile-reading">
                 <span>GPIO 16/17</span>
               </div>
-              <span class="micro-sub">Modbus-RTU 9600 bps</span>
             </div>
           </div>
         </section>
@@ -601,28 +593,28 @@
 
             <div class="env-hero-split">
               <div class="env-hero-box">
-                <span class="micro-slug">PANEL INTERNAL (DS18B20)</span>
+                <span class="micro-slug">PANEL INTERNAL</span>
                 <div class="tile-reading">
                   <span id="envTempPanel">--</span> <small>°C</small>
                 </div>
-                <span class="micro-sub">Kipas ON &ge; <strong id="envThFan">30</strong>°C</span>
+                <span class="micro-sub hidden"><strong id="envThFan">30</strong></span>
               </div>
 
               <div class="env-hero-box">
-                <span class="micro-slug">UDARA AMBIENT (DHT22)</span>
+                <span class="micro-slug">UDARA AMBIENT</span>
                 <div class="tile-reading text-amber">
                   <span id="envTempAir">--</span> <small>°C</small>
                 </div>
-                <span class="micro-sub">AC Split ON &ge; <strong id="envThAc">35</strong>°C</span>
+                <span class="micro-sub hidden"><strong id="envThAc">35</strong></span>
               </div>
             </div>
 
             <div class="env-delta-strip">
               <div class="box-header-row">
-                <span class="micro-slug">DELTA TERMAL (PANEL - UDARA)</span>
+                <span class="micro-slug">DELTA TERMAL</span>
                 <strong class="text-amber"><span id="envDeltaTemp">--</span> °C</strong>
               </div>
-              <span class="micro-sub">Ambang Alarm Overheat Darurat: <strong id="envThAlarm">40</strong>°C</span>
+              <span class="micro-sub hidden"><strong id="envThAlarm">40</strong></span>
             </div>
           </div>
 
@@ -635,7 +627,6 @@
               <div class="tile-reading text-cyan">
                 <span id="envHumidity">--</span> <small>%</small>
               </div>
-              <span class="micro-sub">Rentang ideal: 40% – 70%</span>
             </div>
 
             <div class="blynk-metric-tile glow-green">
@@ -646,7 +637,6 @@
               <div class="tile-reading">
                 <span id="envDewPoint">--</span> <small>°C</small>
               </div>
-              <span class="micro-sub">Proteksi kondensasi panel</span>
             </div>
           </div>
 
@@ -661,24 +651,19 @@
         <!-- ==================== HALAMAN 4: DEVICE CONTROL (STITCH DESIGN) ==================== -->
         <section id="page-control" class="page">
           <div id="controlGuardBanner" class="info-banner hidden">
-            <strong>Mode Read-Only:</strong> Akun Anda berstatus <em>Viewer</em>. Login sebagai Admin/Operator untuk mengirim perintah kontrol.
+            <strong>Mode Read-Only</strong>
           </div>
 
           <div class="panel-box">
             <div class="box-header-row" style="margin-bottom: 10px;">
-              <span class="micro-slug">LOGIKA KENDALI SISTEM</span>
+              <span class="micro-slug">KENDALI SISTEM</span>
               <span id="syncStatusNote" class="quality-tag good">TERSINKRONISASI</span>
             </div>
 
-            <div class="blynk-segmented-pill" style="margin-bottom: 12px;">
-              <button id="btnModeAuto" class="seg-pill-btn active" type="button">AUTO (ESP32)</button>
-              <button id="btnModeManual" class="seg-pill-btn" type="button">MANUAL RTDB</button>
+            <div class="blynk-segmented-pill" style="margin-bottom: 0;">
+              <button id="btnModeAuto" class="seg-pill-btn active" type="button">AUTO</button>
+              <button id="btnModeManual" class="seg-pill-btn" type="button">MANUAL</button>
             </div>
-
-            <p class="muted-text">
-              <strong>AUTO:</strong> Histeresis termal berjalan di ESP32 (Kipas ON &ge;30°C / OFF &le;28°C, AC ON &ge;35°C / OFF &le;32°C, Buzzer &ge;40°C).<br>
-              <strong>MANUAL:</strong> Kendali langsung relai Kipas dan AC melalui switch di bawah.
-            </p>
           </div>
 
           <div class="grid-cards cols-2" style="margin-top: 14px;">
@@ -690,7 +675,6 @@
                     <h4>Kipas Exhaust Panel</h4>
                     <span class="gpio-chip">GPIO 25</span>
                   </div>
-                  <p>TRIGGER: ACTIVE-LOW &bull; ON &ge;30°C / OFF &le;28°C</p>
                 </div>
                 <label class="switch" aria-label="Kontrol Kipas">
                   <input type="checkbox" id="ctrlFan">
@@ -699,7 +683,7 @@
               </div>
               <div class="control-sync-meta">
                 <span>TARGET: <strong id="targetFanText">--</strong></span>
-                <span>AKTUAL ESP32: <strong id="actualFanText">--</strong></span>
+                <span>AKTUAL: <strong id="actualFanText">--</strong></span>
               </div>
             </div>
 
@@ -711,7 +695,6 @@
                     <h4>AC Ruang Panel</h4>
                     <span class="gpio-chip cyan">GPIO 26</span>
                   </div>
-                  <p>COMPRESSOR GUARD: 180s DELAY &bull; ON &ge;35°C / OFF &le;32°C</p>
                 </div>
                 <label class="switch" aria-label="Kontrol AC Split">
                   <input type="checkbox" id="ctrlAc">
@@ -720,7 +703,7 @@
               </div>
               <div class="control-sync-meta">
                 <span>TARGET: <strong id="targetAcText">--</strong></span>
-                <span>AKTUAL ESP32: <strong id="actualAcText">--</strong></span>
+                <span>AKTUAL: <strong id="actualAcText">--</strong></span>
               </div>
             </div>
 
@@ -732,7 +715,6 @@
                     <h4>Buzzer Alarm Darurat</h4>
                     <span class="gpio-chip red">GPIO 27</span>
                   </div>
-                  <p>DRIVER: BC547 ACTIVE-HIGH &bull; TRIP OTOMATIS &ge;40°C</p>
                 </div>
                 <label class="switch" aria-label="Status Buzzer">
                   <input type="checkbox" id="ctrlBuzzer">
@@ -740,8 +722,8 @@
                 </label>
               </div>
               <div class="control-sync-meta">
-                <span>LOGIKA: <strong id="targetBuzzerText">--</strong></span>
-                <span>AKTUAL ESP32: <strong id="actualBuzzerText">--</strong></span>
+                <span>TARGET: <strong id="targetBuzzerText">--</strong></span>
+                <span>AKTUAL: <strong id="actualBuzzerText">--</strong></span>
               </div>
             </div>
 
@@ -753,7 +735,6 @@
                     <h4>Lampu Indikator Beban</h4>
                     <span class="gpio-chip amber">GPIO 14</span>
                   </div>
-                  <p>DRIVER: ACTIVE-HIGH &bull; MENYALA SAAT KIPAS ATAU AC AKTIF</p>
                 </div>
                 <label class="switch" aria-label="Status Lampu Indikator">
                   <input type="checkbox" id="ctrlLamp">
@@ -761,8 +742,8 @@
                 </label>
               </div>
               <div class="control-sync-meta">
-                <span>LOGIKA: <strong id="targetLampText">--</strong></span>
-                <span>AKTUAL ESP32: <strong id="actualLampText">--</strong></span>
+                <span>TARGET: <strong id="targetLampText">--</strong></span>
+                <span>AKTUAL: <strong id="actualLampText">--</strong></span>
               </div>
             </div>
           </div>
@@ -857,16 +838,13 @@
           <div class="two-col-layout" style="margin-top: 0;">
             <form id="backendConfigForm" class="panel-box form-card">
               <h3 class="box-title">Koneksi Backend &amp; Sumber Data</h3>
-              <p class="muted-text" style="margin-bottom: 14px;">
-                Secara default aplikasi langsung tersinkronisasi dengan Firebase RTDB milik ESP32 Anda.
-              </p>
 
               <div class="form-group">
-                <label for="cfgBackendMode">Mode Sumber Data</label>
+                <label for="cfgBackendMode">Sumber Data</label>
                 <select id="cfgBackendMode">
-                  <option value="firebase">Firebase RTDB (Langsung Sinkron ESP32)</option>
-                  <option value="supabase">Supabase Cloud (PostgreSQL + Realtime)</option>
-                  <option value="simulator">Simulasi Interaktif (Demo / Offline Test)</option>
+                  <option value="firebase">Firebase RTDB</option>
+                  <option value="supabase">Supabase Cloud</option>
+                  <option value="simulator">Simulasi</option>
                 </select>
               </div>
 
@@ -903,17 +881,14 @@
 
             <form id="thresholdForm" class="panel-box form-card">
               <h3 class="box-title">Ambang Batas Otomatisasi &amp; Logging</h3>
-              <p class="muted-text" style="margin-bottom: 14px;">
-                Konfigurasi ambang batas temperatur untuk mode otomatis dan peringatan overheat.
-              </p>
 
               <div class="form-group">
-                <label for="cfgThFan">Ambang Suhu Kipas ON (&deg;C) — OFF pada 28&deg;C</label>
+                <label for="cfgThFan">Ambang Suhu Kipas ON (&deg;C)</label>
                 <input type="number" step="0.5" min="15" max="80" id="cfgThFan" value="30">
               </div>
 
               <div class="form-group">
-                <label for="cfgThAc">Ambang Suhu AC Split ON (&deg;C) — OFF pada 32&deg;C</label>
+                <label for="cfgThAc">Ambang Suhu AC Split ON (&deg;C)</label>
                 <input type="number" step="0.5" min="15" max="85" id="cfgThAc" value="35">
               </div>
 
@@ -937,7 +912,7 @@
             <div class="box-header-row">
               <div>
                 <h3 class="box-title">Sesi Pengguna &amp; Hak Akses</h3>
-                <p class="muted-text" id="settingsAuthSummary">Status login akan ditampilkan di sini.</p>
+                <p class="muted-text hidden" id="settingsAuthSummary"></p>
               </div>
               <div class="auth-buttons-row">
                 <button id="btnOpenLoginModal" class="btn-primary" type="button">Login Akun Supabase</button>
@@ -946,12 +921,11 @@
             </div>
 
             <div id="simulatorLabBox" class="sim-lab-box">
-              <strong>Panel Uji Simulasi (Aktif saat Mode Simulasi):</strong>
-              <span>Uji respons otomatis panel terhadap perubahan temperatur:</span>
+              <strong>Panel Uji Simulasi</strong>
               <div class="sim-buttons">
-                <button id="btnSimNormal" class="btn-secondary" type="button">Kondisi Normal (28&deg;C)</button>
-                <button id="btnSimWarm" class="btn-secondary" type="button">Panel Hangat (36&deg;C)</button>
-                <button id="btnSimOverheat" class="btn-danger" type="button">Simulasi Overheat (47&deg;C)</button>
+                <button id="btnSimNormal" class="btn-secondary" type="button">Normal (28&deg;C)</button>
+                <button id="btnSimWarm" class="btn-secondary" type="button">Hangat (36&deg;C)</button>
+                <button id="btnSimOverheat" class="btn-danger" type="button">Overheat (47&deg;C)</button>
               </div>
             </div>
           </div>

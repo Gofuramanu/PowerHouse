@@ -436,10 +436,7 @@ body {
 }
 
 .micro-sub {
-  display: block;
-  font-size: 10.5px;
-  color: var(--text-muted);
-  margin-top: 2px;
+  display: none !important;
 }
 
 /* ---------------- 1. SYSTEM HEALTH 2x2 GRID ---------------- */
@@ -540,11 +537,7 @@ body {
 }
 
 .env-trio-foot {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+  display: none !important;
 }
 
 /* ---------------- 3. ELECTRICAL TELEMETRY 2x3 CARDS ---------------- */
