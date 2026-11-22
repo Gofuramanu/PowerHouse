@@ -79,7 +79,7 @@
         </div>
 
         <div class="topbar-badges">
-          <button id="installAppBtn" class="pill pill-info hidden" type="button">
+          <button id="installAppBtn" class="pill pill-install" type="button">
             📲 Install Aplikasi
           </button>
           <span id="backendBadge" class="pill pill-info">Mode: Firebase ESP32</span>
@@ -614,6 +614,70 @@
           </div>
         </section>
       </main>
+    </div>
+  </div>
+
+  <!-- NAVIGASI BAWAH KHUSUS HP (MOBILE APP BAR) -->
+  <nav id="mobileBottomNav" class="mobile-bottom-nav" aria-label="Navigasi Cepat HP">
+    <button class="mob-nav-item active" data-page="overview" type="button">
+      <span class="mob-icon">📊</span>
+      <span>Overview</span>
+    </button>
+    <button class="mob-nav-item" data-page="electrical" type="button">
+      <span class="mob-icon">⚡</span>
+      <span>Listrik</span>
+    </button>
+    <button class="mob-nav-item" data-page="environment" type="button">
+      <span class="mob-icon">🌡️</span>
+      <span>Suhu</span>
+    </button>
+    <button class="mob-nav-item" data-page="control" type="button">
+      <span class="mob-icon">🎛️</span>
+      <span>Kontrol</span>
+    </button>
+    <button class="mob-nav-item" data-page="history" type="button">
+      <span class="mob-icon">📈</span>
+      <span>Histori</span>
+    </button>
+    <button class="mob-nav-item" data-page="settings" type="button">
+      <span class="mob-icon">⚙️</span>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <!-- MODAL PANDUAN INSTALL APLIKASI (UNTUK MI BROWSER / SAFARI / IN-APP BROWSER) -->
+  <div id="installGuideModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="installGuideTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="installGuideTitle">📲 Pasang Aplikasi PowerHouse IoT</h3>
+        <button id="closeInstallGuideBtn" class="icon-close" type="button" aria-label="Tutup">&times;</button>
+      </div>
+      <div class="install-guide-body">
+        <p class="muted-text" style="margin-bottom: 12px;">
+          Browser yang Anda gunakan saat ini tidak menampilkan pop-up instalasi otomatis. Pilih cara tercepat di bawah ini:
+        </p>
+
+        <div class="install-step-box">
+          <strong>Opsi 1: Buka Otomatis di Google Chrome (Disarankan)</strong>
+          <p>Tekan tombol di bawah untuk langsung berpindah ke Google Chrome lalu tekan <b>Install Aplikasi</b>:</p>
+          <button id="btnOpenInChrome" class="btn-primary" type="button" style="width: 100%; margin-top: 8px;">
+            🌐 Buka di Google Chrome Sekarang
+          </button>
+        </div>
+
+        <div class="install-step-box">
+          <strong>Opsi 2: Pasang Langsung dari Menu Browser Ini</strong>
+          <ol class="install-steps-list">
+            <li>Ketuk tombol menu <b>☰</b> (kanan bawah) atau titik tiga <b>⋮</b> (kanan atas browser).</li>
+            <li>Pilih <b>"Tambahkan ke layar utama"</b> (<i>Add to Home screen</i>) atau <b>"Instal aplikasi"</b>.</li>
+            <li>Di iPhone (Safari): ketuk ikon <b>Share</b> &rarr; <b>Add to Home Screen</b>.</li>
+          </ol>
+        </div>
+
+        <button id="btnCopyAppLink" class="btn-secondary" type="button" style="width: 100%;">
+          📋 Salin Link Aplikasi
+        </button>
+      </div>
     </div>
   </div>
 

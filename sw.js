@@ -1,11 +1,13 @@
-const CACHE_NAME = "powerhouse-iot-pwa-v1";
+const CACHE_NAME = "powerhouse-iot-pwa-v2";
 const STATIC_ASSETS = [
   "./",
   "./index.html",
   "./css/styles.css",
   "./js/app.js",
   "./manifest.json",
-  "./assets/icon.svg"
+  "./assets/icon.svg",
+  "./assets/icon-192.png",
+  "./assets/icon-512.png"
 ];
 
 self.addEventListener("install", (event) => {

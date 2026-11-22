@@ -179,7 +179,7 @@ function navigateTo(pageKey) {
   document.querySelectorAll(".page").forEach((el) => el.classList.remove("active"));
   document.getElementById(`page-${pageKey}`)?.classList.add("active");
 
-  document.querySelectorAll(".nav-item").forEach((btn) => {
+  document.querySelectorAll(".nav-item, .mob-nav-item").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.page === pageKey);
   });
 
@@ -1263,8 +1263,8 @@ function startActiveBackend() {
 }
 
 function bindEvents() {
-  // Navigasi Sidebar & Shortcut
-  document.querySelectorAll(".nav-item").forEach((btn) => {
+  // Navigasi Sidebar, Mobile Bottom Bar & Shortcut
+  document.querySelectorAll(".nav-item, .mob-nav-item").forEach((btn) => {
     btn.addEventListener("click", () => navigateTo(btn.dataset.page));
   });
   document.querySelectorAll("[data-goto]").forEach((btn) => {
@@ -1398,9 +1398,16 @@ function bindEvents() {
 }
 
 // ----------------------------------------------------------------------------
-// PWA INSTALL PROMPT & SERVICE WORKER
+// PWA INSTALL PROMPT & SERVICE WORKER (SELALU TAMPIL DI MODE WEB/BROWSER)
 // ----------------------------------------------------------------------------
 let deferredInstallPrompt = null;
+
+function isRunningStandalone() {
+  return (
+    window.matchMedia?.("(display-mode: standalone)")?.matches ||
+    window.navigator.standalone === true
+  );
+}
 
 function initPwaSupport() {
   if ("serviceWorker" in navigator && window.location.protocol.startsWith("http")) {
@@ -1408,23 +1415,65 @@ function initPwaSupport() {
   }
 
   const installBtn = document.getElementById("installAppBtn");
+  const guideModal = document.getElementById("installGuideModal");
+
+  // Sembunyikan tombol hanya jika sudah berjalan di dalam aplikasi yang terinstall
+  if (isRunningStandalone()) {
+    installBtn?.classList.add("hidden");
+  } else {
+    installBtn?.classList.remove("hidden");
+  }
+
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredInstallPrompt = e;
-    installBtn?.classList.remove("hidden");
+    if (!isRunningStandalone()) {
+      installBtn?.classList.remove("hidden");
+    }
   });
 
   installBtn?.addEventListener("click", async () => {
-    if (!deferredInstallPrompt) return;
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
-    installBtn.classList.add("hidden");
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice?.outcome === "accepted") {
+        deferredInstallPrompt = null;
+        installBtn.classList.add("hidden");
+      }
+      return;
+    }
+    // Jika dibuka di Mi Browser / Safari / In-App Browser yang tidak mendukung prompt otomatis
+    guideModal?.classList.remove("hidden");
+  });
+
+  document.getElementById("closeInstallGuideBtn")?.addEventListener("click", () => {
+    guideModal?.classList.add("hidden");
+  });
+
+  document.getElementById("btnOpenInChrome")?.addEventListener("click", () => {
+    const cleanUrl = window.location.href.replace(/^https?:\/\//, "");
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    if (isAndroid) {
+      window.location.href = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end`;
+    } else {
+      navigator.clipboard?.writeText(window.location.href);
+      alert("Link disalin! Silakan buka aplikasi Google Chrome atau Safari lalu tempelkan link tersebut.");
+    }
+  });
+
+  document.getElementById("btnCopyAppLink")?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      alert("Link aplikasi berhasil disalin! Buka Google Chrome lalu tempel link tersebut.");
+    } catch {
+      prompt("Salin link aplikasi berikut:", window.location.href);
+    }
   });
 
   window.addEventListener("appinstalled", () => {
     deferredInstallPrompt = null;
     installBtn?.classList.add("hidden");
+    guideModal?.classList.add("hidden");
   });
 }
 

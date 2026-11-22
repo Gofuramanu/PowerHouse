@@ -264,6 +264,51 @@ body {
   background: var(--bg-card-hover);
 }
 
+.pill-install {
+  background: linear-gradient(135deg, #2563eb, #0284c7);
+  border-color: #38bdf8;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.35);
+}
+
+.pill-install:hover {
+  filter: brightness(1.1);
+}
+
+/* ---------------- MOBILE BOTTOM NAV & INSTALL MODAL ---------------- */
+.mobile-bottom-nav {
+  display: none;
+}
+
+.install-guide-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.install-step-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.install-step-box strong {
+  display: block;
+  color: var(--info);
+  margin-bottom: 4px;
+}
+
+.install-steps-list {
+  margin: 6px 0 0 18px;
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 /* ---------------- ALERT BANNER ---------------- */
 .alert-banner {
   margin: 16px 24px 0;
@@ -910,21 +955,159 @@ select:focus {
     display: inline-grid;
     place-items: center;
   }
+  .content {
+    padding: 16px 14px 86px;
+  }
+  .mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 62px;
+    background: rgba(17, 24, 39, 0.96);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    z-index: 30;
+    padding: 4px 4px env(safe-area-inset-bottom, 4px);
+  }
+  .mob-nav-item {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .mob-nav-item .mob-icon {
+    font-size: 16px;
+    line-height: 1.1;
+  }
+  .mob-nav-item.active {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+  }
 }
 
-@media (max-width: 560px) {
-  .content {
-    padding: 14px;
-  }
+@media (max-width: 600px) {
   .topbar {
-    padding: 12px 14px;
+    padding: 10px 12px;
+    gap: 8px;
   }
+  .topbar-left {
+    width: 100%;
+  }
+  .topbar-left h2 {
+    font-size: 17px;
+  }
+  .topbar-subtitle {
+    display: none;
+  }
+  .topbar-badges {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .pill {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+  .pill-install {
+    flex: 1 1 100%;
+    text-align: center;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .alert-banner {
+    margin: 10px 12px 0;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  /* Grid 2 kolom yang padat & rapi di layar HP agar tidak perlu scroll panjang */
   .status-strip,
   .cols-4,
   .cols-3,
-  .cols-2,
-  .env-mini-grid,
   .actuator-pills {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  /* Kartu kontrol & form tetap 1 kolom penuh di HP agar nyaman ditekan */
+  .cols-2 {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .env-mini-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .env-mini {
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .env-mini strong {
+    font-size: 15px;
+  }
+  .strip-item,
+  .metric-card,
+  .panel-box,
+  .control-card {
+    padding: 13px;
+  }
+  .strip-item strong {
+    font-size: 15px;
+    word-break: break-word;
+  }
+  .metric-value {
+    font-size: 21px;
+  }
+  .metric-value small {
+    font-size: 12px;
+  }
+  .metric-label,
+  .strip-label {
+    font-size: 11px;
+  }
+  .metric-foot {
+    font-size: 11px;
+  }
+  .card-top-row {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .control-mode-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .mode-switch-group {
+    width: 100%;
+  }
+  .mode-btn {
+    flex: 1;
+    padding: 10px;
+  }
+  .filter-bar,
+  .filter-controls,
+  .custom-dates {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  .field-inline {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .chart-wrapper {
+    height: 220px;
+  }
+  .chart-wrapper.tall {
+    height: 250px;
   }
 }
