@@ -28,30 +28,35 @@ const defaultSettings = {
     "AIzaSyDVroHlxiu8K5kjnQDZKtffHLshoFBuaUo"
 };
 
-const appState = {
-  settings: loadSettings(),
-  activePage: "overview",
-  user: null,
-  role: "admin", // Pada mode simulator/firebase default admin; pada Supabase mengikuti user_roles
-  telemetry: {
-    voltage: 221.4,
-    current: 4.82,
-    power: 1012,
-    energy: 148.62,
-    frequency: 50.0,
-    power_factor: 0.94,
-    temp_air: 29.4,
-    temp_panel: 28.5,
-    humidity: 62.5,
+function createEmptyTelemetry() {
+  return {
+    voltage: 0,
+    current: 0,
+    power: 0,
+    energy: 0,
+    frequency: 0,
+    power_factor: 0,
+    temp_air: 0,
+    temp_panel: 0,
+    humidity: 0,
     actual_mode: "AUTO",
     actual_fan: false,
     actual_ac: false,
     actual_buzzer: false,
     actual_lamp: false,
     uptime_seconds: 0,
-    wifi_connected: true,
-    last_seen_at: new Date().toISOString()
-  },
+    wifi_connected: false,
+    last_seen_at: null
+  };
+}
+
+const appState = {
+  settings: loadSettings(),
+  activePage: "overview",
+  user: null,
+  role: "admin", // Pada mode simulator/firebase default admin; pada Supabase mengikuti user_roles
+  lastOnlineState: false,
+  telemetry: createEmptyTelemetry(),
   config: {
     target_mode: "AUTO",
     target_fan: false,
@@ -133,6 +138,15 @@ function setQualityTag(id, label, level) {
   if (!el) return;
   el.textContent = label;
   el.className = "quality-tag " + level;
+}
+
+function isDeviceOnline() {
+  if (appState.settings.mode === "simulator") return true;
+  const t = appState.telemetry;
+  if (!t || !t.wifi_connected || !t.last_seen_at) return false;
+  const lastMs = new Date(t.last_seen_at).getTime();
+  if (!Number.isFinite(lastMs)) return false;
+  return Date.now() - lastMs <= 15000;
 }
 
 function canUserControl() {
@@ -407,31 +421,33 @@ function pushRealtimePoint(t) {
 // RENDER SELURUH UI DARI STATE
 // ----------------------------------------------------------------------------
 function renderAll() {
-  const t = appState.telemetry;
+  const online = isDeviceOnline();
+  appState.lastOnlineState = online;
+  const t = online ? appState.telemetry : createEmptyTelemetry();
   const c = appState.config;
 
   setText("sidebarDeviceId", appState.settings.deviceId);
   renderTopbarBadges();
 
   // --- HALAMAN 1: OVERVIEW (LUMEN TELEMETRY / BLYNK STYLE) ---
-  setText("ovWifiStatus", t.wifi_connected ? "Connected" : "Offline");
+  setText("ovWifiStatus", online && t.wifi_connected ? "Connected" : "Offline");
   const wifiDot = document.getElementById("ovWifiDot");
-  if (wifiDot) wifiDot.className = "led-pip " + (t.wifi_connected ? "green" : "red");
+  if (wifiDot) wifiDot.className = "led-pip " + (online && t.wifi_connected ? "green" : "red");
 
-  setText("ovLastSeen", formatTime(t.last_seen_at));
-  setText("ovMode", t.actual_mode);
+  setText("ovLastSeen", online ? formatTime(t.last_seen_at) : "--");
+  setText("ovMode", online ? t.actual_mode : "OFFLINE");
   setText("ovModeHint", `${formatNum(c.temp_threshold_alarm, 0)}°C`);
-  setText("ovUptime", formatUptime(t.uptime_seconds));
+  setText("ovUptime", online ? formatUptime(t.uptime_seconds) : "00h 00m");
 
-  const deltaT = (Number(t.temp_panel) || 0) - (Number(t.temp_air) || 0);
-  setText("ovThermalDelta", `${deltaT >= 0 ? "+" : ""}${deltaT.toFixed(1)} °C`);
-  const isOverheat = t.temp_panel >= c.temp_threshold_alarm;
-  const isWarm = t.temp_panel >= c.temp_threshold_ac;
-  const thermalHealth = isOverheat ? "Critical" : isWarm ? "Warm" : "Safe";
+  const deltaT = online ? (Number(t.temp_panel) || 0) - (Number(t.temp_air) || 0) : 0;
+  setText("ovThermalDelta", online ? `${deltaT >= 0 ? "+" : ""}${deltaT.toFixed(1)} °C` : "0.0 °C");
+  const isOverheat = online && t.temp_panel >= c.temp_threshold_alarm;
+  const isWarm = online && t.temp_panel >= c.temp_threshold_ac;
+  const thermalHealth = !online ? "Offline" : isOverheat ? "Critical" : isWarm ? "Warm" : "Safe";
   setText("ovThermalHealth", thermalHealth);
   const thermalDot = document.getElementById("ovThermalDot");
   if (thermalDot) {
-    thermalDot.className = "led-pip " + (isOverheat ? "red" : isWarm ? "amber" : "green");
+    thermalDot.className = "led-pip " + (!online ? "red" : isOverheat ? "red" : isWarm ? "amber" : "green");
   }
 
   setText("ovVoltage", formatNum(t.voltage, 1));
@@ -445,19 +461,19 @@ function renderAll() {
   setText("ovTempAir", formatNum(t.temp_air, 1));
   setText("ovHumidity", formatNum(t.humidity, 1));
 
-  setStateBadge("ovFanBadge", t.actual_fan);
-  setStateBadge("ovAcBadge", t.actual_ac);
-  setStateBadge("ovBuzzerBadge", t.actual_buzzer);
-  setStateBadge("ovLampBadge", t.actual_lamp);
+  setStateBadge("ovFanBadge", online && t.actual_fan);
+  setStateBadge("ovAcBadge", online && t.actual_ac);
+  setStateBadge("ovBuzzerBadge", online && t.actual_buzzer);
+  setStateBadge("ovLampBadge", online && t.actual_lamp);
 
   // --- HALAMAN 2: ELECTRICAL ---
-  const v = Number(t.voltage) || 0;
-  const i = Number(t.current) || 0;
-  const p = Number(t.power) || 0;
-  const pf = Number(t.power_factor) || 0;
-  const freq = Number(t.frequency) || 0;
-  const kwh = Number(t.energy) || 0;
-  const loadPct = Math.min(100, Math.max(0, (p / 3500) * 100));
+  const v = online ? Number(t.voltage) || 0 : 0;
+  const i = online ? Number(t.current) || 0 : 0;
+  const p = online ? Number(t.power) || 0 : 0;
+  const pf = online ? Number(t.power_factor) || 0 : 0;
+  const freq = online ? Number(t.frequency) || 0 : 0;
+  const kwh = online ? Number(t.energy) || 0 : 0;
+  const loadPct = online ? Math.min(100, Math.max(0, (p / 3500) * 100)) : 0;
 
   setText("elVoltage", formatNum(v, 1));
   setText("elCurrent", formatNum(i, 2));
@@ -465,44 +481,49 @@ function renderAll() {
   setText("elPower", formatNum(p, 0));
   setText("elLoadPct", `${loadPct.toFixed(1)}% BEBAN`);
   const loadBar = document.getElementById("elLoadBar");
-  if (loadBar) loadBar.style.width = `${Math.max(4, loadPct)}%`;
+  if (loadBar) loadBar.style.width = online ? `${Math.max(4, loadPct)}%` : "0%";
   setText("elEnergy", formatNum(kwh, 2));
   setText("elFrequency", formatNum(freq, 1));
   setText("elPf", formatNum(pf, 2));
   setText("elEstCost", "Rp " + Math.round(kwh * 1445).toLocaleString("id-ID"));
 
-  if (v === 0) setQualityTag("elVoltageQuality", "0 V / Padam", "warn");
+  if (!online) setQualityTag("elVoltageQuality", "Offline", "neutral");
+  else if (v === 0) setQualityTag("elVoltageQuality", "0 V / Padam", "warn");
   else if (v >= 207 && v <= 242) setQualityTag("elVoltageQuality", "Normal", "good");
   else setQualityTag("elVoltageQuality", "Abnormal", "bad");
 
-  if (freq === 0) setQualityTag("elFreqQuality", "0 Hz", "warn");
+  if (!online) setQualityTag("elFreqQuality", "Offline", "neutral");
+  else if (freq === 0) setQualityTag("elFreqQuality", "0 Hz", "warn");
   else if (freq >= 49.5 && freq <= 50.5) setQualityTag("elFreqQuality", "Stabil", "good");
   else setQualityTag("elFreqQuality", "Deviasi", "warn");
 
-  if (pf >= 0.85) setQualityTag("elPfQuality", "Efisien", "good");
+  if (!online) setQualityTag("elPfQuality", "--", "neutral");
+  else if (pf >= 0.85) setQualityTag("elPfQuality", "Efisien", "good");
   else if (pf > 0) setQualityTag("elPfQuality", "PF Rendah", "warn");
   else setQualityTag("elPfQuality", "--", "neutral");
 
   // --- HALAMAN 3: ENVIRONMENT ---
-  const tp = Number(t.temp_panel) || 0;
-  const ta = Number(t.temp_air) || 0;
-  const hum = Number(t.humidity) || 0;
-  const dewPoint = ta - (100 - hum) / 5;
+  const tp = online ? Number(t.temp_panel) || 0 : 0;
+  const ta = online ? Number(t.temp_air) || 0 : 0;
+  const hum = online ? Number(t.humidity) || 0 : 0;
+  const dewPoint = online ? ta - (100 - hum) / 5 : 0;
 
   setText("envTempPanel", formatNum(tp, 1));
   setText("envTempAir", formatNum(ta, 1));
   setText("envHumidity", formatNum(hum, 1));
   setText("envDewPoint", formatNum(dewPoint, 1));
-  setText("envDeltaTemp", `${deltaT >= 0 ? "+" : ""}${deltaT.toFixed(1)}`);
+  setText("envDeltaTemp", online ? `${deltaT >= 0 ? "+" : ""}${deltaT.toFixed(1)}` : "0.0");
   setText("envThFan", formatNum(c.temp_threshold_fan, 1));
   setText("envThAc", formatNum(c.temp_threshold_ac, 1));
   setText("envThAlarm", formatNum(c.temp_threshold_alarm, 1));
 
-  if (tp >= c.temp_threshold_alarm) setQualityTag("envPanelZone", "KRITIS", "bad");
+  if (!online) setQualityTag("envPanelZone", "Offline", "neutral");
+  else if (tp >= c.temp_threshold_alarm) setQualityTag("envPanelZone", "KRITIS", "bad");
   else if (tp >= c.temp_threshold_fan) setQualityTag("envPanelZone", "Waspada", "warn");
   else setQualityTag("envPanelZone", "Normal", "good");
 
-  if (hum > 75) setQualityTag("envHumidityZone", "Terlalu Lembap", "warn");
+  if (!online) setQualityTag("envHumidityZone", "Offline", "neutral");
+  else if (hum > 75) setQualityTag("envHumidityZone", "Terlalu Lembap", "warn");
   else if (hum < 30 && hum > 0) setQualityTag("envHumidityZone", "Kering", "warn");
   else setQualityTag("envHumidityZone", "Ideal", "good");
 
@@ -540,10 +561,7 @@ function updateHeartbeatBadge() {
   const textEl = document.getElementById("heartbeatText");
   if (!badge) return;
 
-  const lastMs = new Date(appState.telemetry.last_seen_at).getTime();
-  const ageSec = Number.isFinite(lastMs) ? Math.max(0, Math.floor((Date.now() - lastMs) / 1000)) : 9999;
-
-  if (ageSec <= 15 && appState.telemetry.wifi_connected) {
+  if (isDeviceOnline()) {
     badge.className = "blynk-status-pill online";
     if (textEl) textEl.textContent = "ESP32 ONLINE";
   } else {
@@ -558,27 +576,27 @@ function evaluateAlerts() {
   const textEl = document.getElementById("alertBannerText");
   if (!banner || !iconEl || !textEl) return;
 
-  const tp = Number(appState.telemetry.temp_panel) || 0;
+  const online = isDeviceOnline();
+  const tp = online ? Number(appState.telemetry.temp_panel) || 0 : 0;
   const alarmTh = Number(appState.config.temp_threshold_alarm) || 40;
-  const lastMs = new Date(appState.telemetry.last_seen_at).getTime();
-  const offline = !Number.isFinite(lastMs) || Date.now() - lastMs > 15000;
 
-  if (tp >= alarmTh) {
+  if (online && tp >= alarmTh) {
     banner.className = "alert-banner";
     iconEl.textContent = "OVERHEAT";
     textEl.textContent = `Suhu panel mencapai ${tp.toFixed(1)}°C (Batas darurat ${alarmTh}°C). Sistem proteksi aktif.`;
-  } else if (offline && appState.settings.mode !== "simulator") {
+  } else if (!online && appState.settings.mode !== "simulator") {
     banner.className = "alert-banner warning";
     iconEl.textContent = "OFFLINE";
-    textEl.textContent = "ESP32 tidak mengirim pembaruan lebih dari 15 detik. Periksa catu daya atau jaringan WiFi panel.";
+    textEl.textContent = "ESP32 tidak terhubung. Data sensor direset hingga perangkat kembali online.";
   } else {
     banner.className = "alert-banner hidden";
   }
 }
 
 function renderControlPage() {
+  const online = isDeviceOnline();
   const c = appState.config;
-  const t = appState.telemetry;
+  const t = online ? appState.telemetry : createEmptyTelemetry();
   const allowed = canUserControl();
   const isManual = c.target_mode === "MANUAL";
 
@@ -616,18 +634,23 @@ function renderControlPage() {
       }
     });
     setText(b.targetText, b.customTarget || (b.targetVal ? "ON" : "OFF"));
-    setText(b.actualText, b.actualVal ? "ON" : "OFF");
+    setText(b.actualText, online ? (b.actualVal ? "ON" : "OFF") : "OFF");
   });
 
   const inSync =
+    online &&
     c.target_mode === t.actual_mode &&
     (!isManual || (c.target_fan === t.actual_fan && c.target_ac === t.actual_ac));
 
-  setQualityTag(
-    "syncStatusNote",
-    inSync ? "TERSINKRONISASI" : "MENUNGGU ESP32...",
-    inSync ? "good" : "warn"
-  );
+  if (!online) {
+    setQualityTag("syncStatusNote", "ESP32 OFFLINE", "warn");
+  } else {
+    setQualityTag(
+      "syncStatusNote",
+      inSync ? "TERSINKRONISASI" : "MENUNGGU ESP32...",
+      inSync ? "good" : "warn"
+    );
+  }
 }
 
 function renderActivityFeed() {
@@ -873,6 +896,14 @@ function evaluateSimulatorPhysics(dtSec) {
 function startSimulatorMode() {
   stopActiveConnections();
   appState.role = "admin";
+  appState.telemetry = {
+    ...createEmptyTelemetry(),
+    temp_air: 29.4,
+    temp_panel: 28.5,
+    humidity: 62.5,
+    wifi_connected: true,
+    last_seen_at: new Date().toISOString()
+  };
   if (appState.historyLogs.length === 0) seedSimulatorHistory();
 
   evaluateSimulatorPhysics(2);
@@ -892,6 +923,11 @@ function startSimulatorMode() {
 // ----------------------------------------------------------------------------
 async function startSupabaseMode() {
   stopActiveConnections();
+  appState.telemetry = createEmptyTelemetry();
+  appState.realtimeSeries = [];
+  updateRealtimeCharts();
+  renderAll();
+
   const { supabaseUrl, supabaseAnonKey } = appState.settings;
 
   if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes("PROJECT_ID_ANDA")) {
@@ -965,7 +1001,11 @@ async function fetchSupabaseInitialState() {
 
   if (stateRes.data) {
     appState.telemetry = stateRes.data;
-    pushRealtimePoint(stateRes.data);
+    if (isDeviceOnline()) {
+      pushRealtimePoint(stateRes.data);
+    }
+  } else {
+    appState.telemetry = createEmptyTelemetry();
   }
   if (cfgRes.data) {
     appState.config = cfgRes.data;
@@ -1034,6 +1074,11 @@ function unsubscribeSupabaseRealtime() {
 async function startFirebaseMode() {
   stopActiveConnections();
   appState.role = "admin";
+  appState.telemetry = createEmptyTelemetry();
+  appState.realtimeSeries = [];
+  updateRealtimeCharts();
+  renderAll();
+
   const { firebaseDbUrl, firebaseApiKey } = appState.settings;
 
   try {
@@ -1063,6 +1108,8 @@ async function startFirebaseMode() {
     const telemetryRef = ref(db, "panel/telemetry");
     const controlRef = ref(db, "panel/control");
     let hasControlNode = false;
+    let hasInitialFirebaseSnapshot = false;
+    let lastFirebasePayload = null;
 
     // 1. Dengarkan node /panel/control (tempat Kendali_akuisisi.ino membaca mode, fan, ac)
     const unsubControl = onValue(controlRef, (snapshot) => {
@@ -1082,7 +1129,26 @@ async function startFirebaseMode() {
     // 2. Dengarkan node /panel/telemetry (tempat Kendali_akuisisi.ino mengirim data sensor tiap 5 detik)
     const unsubTelemetry = onValue(telemetryRef, (snapshot) => {
       const d = snapshot.val();
-      if (!d) return;
+      if (!d) {
+        appState.telemetry = createEmptyTelemetry();
+        renderAll();
+        return;
+      }
+
+      const rawPayload = JSON.stringify(d);
+
+      // Snapshot pertama dari Firebase RTDB adalah data lama yang tersimpan sebelumnya.
+      // Jangan langsung dianggap ONLINE sebelum ESP32 benar-benar mengirim pembaruan baru.
+      if (!hasInitialFirebaseSnapshot) {
+        hasInitialFirebaseSnapshot = true;
+        lastFirebasePayload = rawPayload;
+        appState.telemetry = createEmptyTelemetry();
+        renderAll();
+        return;
+      }
+
+      if (rawPayload === lastFirebasePayload) return;
+      lastFirebasePayload = rawPayload;
 
       const elec = d.electrical || {};
       const out = d.output || {};
@@ -1617,9 +1683,19 @@ document.addEventListener("DOMContentLoaded", () => {
   initPwaSupport();
   startActiveBackend();
 
-  // Perbarui indikator umur heartbeat setiap 1 detik
+  // Perbarui indikator umur heartbeat setiap 1 detik & reset tampilan otomatis saat offline
   heartbeatTimerId = setInterval(() => {
-    updateHeartbeatBadge();
-    evaluateAlerts();
+    const currentlyOnline = isDeviceOnline();
+    if (currentlyOnline !== appState.lastOnlineState) {
+      appState.lastOnlineState = currentlyOnline;
+      if (!currentlyOnline && appState.settings.mode !== "simulator") {
+        appState.realtimeSeries = [];
+        updateRealtimeCharts();
+      }
+      renderAll();
+    } else {
+      updateHeartbeatBadge();
+      evaluateAlerts();
+    }
   }, 1000);
 });

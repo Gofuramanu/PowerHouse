@@ -98,10 +98,10 @@
           </div>
 
           <div class="header-pills-right">
-            <!-- Status Pill: ESP32 ONLINE -->
-            <div id="heartbeatBadge" class="blynk-status-pill online">
+            <!-- Status Pill: ESP32 OFFLINE (Default until live telemetry arrives) -->
+            <div id="heartbeatBadge" class="blynk-status-pill offline">
               <span class="led-pip"></span>
-              <span id="heartbeatText">ESP32<br>ONLINE</span>
+              <span id="heartbeatText">ESP32<br>OFFLINE</span>
             </div>
 
             <!-- Install App Button (Always visible on Web Browser) -->
@@ -168,8 +168,8 @@
               <div class="health-info">
                 <span class="micro-slug">WIFI STATUS</span>
                 <div class="health-val-row">
-                  <span id="ovWifiDot" class="led-pip green"></span>
-                  <strong id="ovWifiStatus">Connected</strong>
+                  <span id="ovWifiDot" class="led-pip red"></span>
+                  <strong id="ovWifiStatus">Offline</strong>
                 </div>
                 <small id="ovLastSeen" class="micro-sub">Update: --</small>
               </div>
@@ -202,8 +202,8 @@
               <div class="health-info">
                 <span class="micro-slug">THERMAL STATUS</span>
                 <div class="health-val-row">
-                  <span id="ovThermalDot" class="led-pip green"></span>
-                  <strong id="ovThermalHealth">Safe</strong>
+                  <span id="ovThermalDot" class="led-pip red"></span>
+                  <strong id="ovThermalHealth">Offline</strong>
                 </div>
                 <small id="ovModeHint" class="micro-sub">Threshold 40°C</small>
               </div>
@@ -220,7 +220,7 @@
               <div class="health-info">
                 <span class="micro-slug">THERMAL DELTA</span>
                 <div class="health-val-row">
-                  <strong id="ovThermalDelta" class="text-amber">+0.0 °C</strong>
+                  <strong id="ovThermalDelta" class="text-amber">0.0 °C</strong>
                 </div>
                 <small class="micro-sub">Panel vs Ambient</small>
               </div>
