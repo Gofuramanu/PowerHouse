@@ -1327,37 +1327,227 @@ function renderHistoryAnalytics(rows) {
   }
 }
 
+function formatLocalTimestamp(isoStr) {
+  const d = new Date(isoStr);
+  if (Number.isNaN(d.getTime())) return "--";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function getExportTelemetryRows() {
+  const rawRows =
+    appState.filteredHistory && appState.filteredHistory.length > 0
+      ? appState.filteredHistory
+      : appState.historyLogs || [];
+
+  return rawRows.map((r) => ({
+    time: formatLocalTimestamp(r.recorded_at),
+    voltage: Number(r.voltage ?? 0).toFixed(1),
+    current: Number(r.current ?? 0).toFixed(2),
+    power: Number(r.power ?? 0).toFixed(0),
+    energy: Number(r.energy ?? 0).toFixed(3),
+    frequency: Number(r.frequency ?? 0).toFixed(1),
+    pf: Number(r.power_factor ?? 0).toFixed(2),
+    tempPanel: Number(r.temp_panel ?? 0).toFixed(1),
+    tempAir: Number(r.temp_air ?? 0).toFixed(1),
+    humidity: Number(r.humidity ?? 0).toFixed(1),
+    mode: String(r.mode || r.actual_mode || "AUTO").toUpperCase(),
+    fan: Boolean(r.fan ?? r.actual_fan) ? "ON" : "OFF",
+    ac: Boolean(r.ac ?? r.actual_ac) ? "ON" : "OFF",
+    buzzer: Boolean(r.buzzer ?? r.actual_buzzer) ? "ON" : "OFF",
+    lamp: Boolean(r.lamp ?? r.actual_lamp) ? "ON" : "OFF"
+  }));
+}
+
+function escapeCsvCell(val) {
+  const str = String(val ?? "");
+  return /[;"\r\n,]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+}
+
 function exportHistoryCsv() {
-  const rows = appState.filteredHistory || appState.historyLogs || [];
+  const rows = getExportTelemetryRows();
   if (rows.length === 0) {
     alert("Tidak ada data histori untuk diexport.");
     return;
   }
 
   const headers = [
-    "recorded_at", "voltage_V", "current_A", "power_W", "energy_kWh",
-    "frequency_Hz", "power_factor", "temp_air_C", "temp_panel_C",
-    "humidity_pct", "mode", "fan", "ac", "buzzer", "lamp"
+    "Waktu",
+    "Tegangan (V)",
+    "Arus (A)",
+    "Daya (W)",
+    "Energi (kWh)",
+    "Frekuensi (Hz)",
+    "Power Factor",
+    "Suhu Panel (C)",
+    "Suhu Udara (C)",
+    "Kelembapan (%)",
+    "Mode",
+    "Kipas",
+    "AC",
+    "Buzzer",
+    "Lampu"
   ];
 
   const lines = [
-    headers.join(","),
+    "sep=;",
+    headers.map(escapeCsvCell).join(";"),
     ...rows.map((r) =>
       [
-        r.recorded_at, r.voltage, r.current, r.power, r.energy,
-        r.frequency, r.power_factor, r.temp_air, r.temp_panel,
-        r.humidity, r.mode || r.actual_mode, r.fan, r.ac, r.buzzer, r.lamp
-      ].join(",")
+        r.time,
+        r.voltage,
+        r.current,
+        r.power,
+        r.energy,
+        r.frequency,
+        r.pf,
+        r.tempPanel,
+        r.tempAir,
+        r.humidity,
+        r.mode,
+        r.fan,
+        r.ac,
+        r.buzzer,
+        r.lamp
+      ]
+        .map(escapeCsvCell)
+        .join(";")
     )
   ];
 
-  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = `telemetry_${appState.settings.deviceId}_${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function exportHistoryPdf() {
+  const rows = getExportTelemetryRows();
+  if (rows.length === 0) {
+    alert("Tidak ada data histori untuk diexport.");
+    return;
+  }
+
+  if (!window.jspdf?.jsPDF) {
+    alert("Library PDF belum siap atau gagal dimuat. Pastikan koneksi internet aktif lalu coba lagi.");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+
+  const rangeSelect = document.getElementById("historyRangeSelect");
+  const rangeLabel = rangeSelect?.options[rangeSelect.selectedIndex]?.text || "24 Jam Terakhir";
+  const peakPower = document.getElementById("histPeakPower")?.textContent || "0";
+  const avgTemp = document.getElementById("histAvgTemp")?.textContent || "--";
+  const deltaEnergy = document.getElementById("histDeltaEnergy")?.textContent || "0.000";
+  const avgPf = document.getElementById("histAvgPf")?.textContent || "--";
+
+  // Header Laporan
+  doc.setFillColor(14, 14, 18);
+  doc.rect(0, 0, 297, 24, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("POWER HOUSE PANEL - LAPORAN TELEMETRI & HISTORI", 14, 11);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(
+    `Node ID: ${appState.settings.deviceId}  |  Sumber Data: ${appState.settings.mode.toUpperCase()}  |  Rentang: ${rangeLabel}  |  Dicetak: ${formatLocalTimestamp(new Date().toISOString())}`,
+    14,
+    18
+  );
+
+  // Ringkasan Metrik
+  doc.setTextColor(20, 20, 24);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.5);
+  doc.text(
+    `Daya Puncak: ${peakPower} W    |    Rata-rata Suhu Panel: ${avgTemp} C    |    Konsumsi Energi: ${deltaEnergy} kWh    |    Rata-rata PF: ${avgPf}    |    Total Sampel: ${rows.length}`,
+    14,
+    31
+  );
+
+  const tableHeaders = [
+    [
+      "Waktu",
+      "Teg (V)",
+      "Arus (A)",
+      "Daya (W)",
+      "Energi (kWh)",
+      "Freq (Hz)",
+      "PF",
+      "T.Panel (C)",
+      "T.Udara (C)",
+      "RH (%)",
+      "Mode",
+      "Kipas",
+      "AC",
+      "Buzzer",
+      "Lampu"
+    ]
+  ];
+
+  const tableBody = rows.map((r) => [
+    r.time,
+    r.voltage,
+    r.current,
+    r.power,
+    r.energy,
+    r.frequency,
+    r.pf,
+    r.tempPanel,
+    r.tempAir,
+    r.humidity,
+    r.mode,
+    r.fan,
+    r.ac,
+    r.buzzer,
+    r.lamp
+  ]);
+
+  if (typeof doc.autoTable === "function") {
+    doc.autoTable({
+      startY: 35,
+      head: tableHeaders,
+      body: tableBody,
+      theme: "grid",
+      styles: {
+        font: "helvetica",
+        fontSize: 7.5,
+        cellPadding: 2,
+        textColor: [24, 24, 27],
+        lineColor: [220, 220, 226],
+        lineWidth: 0.2
+      },
+      headStyles: {
+        fillColor: [18, 18, 22],
+        textColor: [255, 255, 255],
+        fontStyle: "bold"
+      },
+      alternateRowStyles: {
+        fillColor: [246, 246, 248]
+      },
+      margin: { left: 14, right: 14, bottom: 14 },
+      didDrawPage: (data) => {
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(8);
+        doc.setTextColor(110, 110, 120);
+        doc.text(
+          `Halaman ${data.pageNumber} dari ${pageCount}`,
+          283,
+          203,
+          { align: "right" }
+        );
+      }
+    });
+  }
+
+  doc.save(`laporan_panel_${appState.settings.deviceId}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
 // ----------------------------------------------------------------------------
@@ -1481,6 +1671,7 @@ function bindEvents() {
   });
   document.getElementById("btnLoadHistory")?.addEventListener("click", loadHistoryData);
   document.getElementById("btnExportCsv")?.addEventListener("click", exportHistoryCsv);
+  document.getElementById("btnExportPdf")?.addEventListener("click", exportHistoryPdf);
 
   // Halaman 6: Settings Backend
   document.getElementById("cfgBackendMode")?.addEventListener("change", (e) => {

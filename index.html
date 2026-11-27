@@ -15,6 +15,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -768,7 +770,10 @@
               <button id="btnLoadHistory" class="btn-primary" type="button">Muat Histori</button>
             </div>
 
-            <button id="btnExportCsv" class="btn-secondary" type="button">Export CSV</button>
+            <div class="export-actions">
+              <button id="btnExportCsv" class="btn-secondary" type="button">Export CSV</button>
+              <button id="btnExportPdf" class="btn-secondary" type="button">Export PDF</button>
+            </div>
           </div>
 
           <div class="health-grid-2x2" style="margin-top: 14px;">
