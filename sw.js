@@ -1,4 +1,4 @@
-const CACHE_NAME = "powerhouse-iot-pwa-v7";
+const CACHE_NAME = "powerhouse-iot-pwa-v8";
 const STATIC_ASSETS = [
   "./",
   "./index.html",

@@ -376,22 +376,7 @@ function applyTheme(theme) {
   });
 }
 
-function pushRealtimePoint(t) {
-  appState.realtimeSeries.push({
-    label: formatTime(t.last_seen_at || new Date().toISOString()),
-    power: Number(t.power) || 0,
-    current: Number(t.current) || 0,
-    voltage: Number(t.voltage) || 0,
-    pf: Number(t.power_factor) || 0,
-    tempPanel: Number(t.temp_panel) || 0,
-    tempAir: Number(t.temp_air) || 0,
-    humidity: Number(t.humidity) || 0
-  });
-
-  if (appState.realtimeSeries.length > MAX_REALTIME_POINTS) {
-    appState.realtimeSeries.shift();
-  }
-
+function updateRealtimeCharts() {
   const labels = appState.realtimeSeries.map((p) => p.label);
 
   if (charts.elPower) {
@@ -415,6 +400,25 @@ function pushRealtimePoint(t) {
     charts.env.data.datasets[2].data = appState.realtimeSeries.map((p) => p.humidity);
     charts.env.update("none");
   }
+}
+
+function pushRealtimePoint(t) {
+  appState.realtimeSeries.push({
+    label: formatTime(t.last_seen_at || new Date().toISOString()),
+    power: Number(t.power) || 0,
+    current: Number(t.current) || 0,
+    voltage: Number(t.voltage) || 0,
+    pf: Number(t.power_factor) || 0,
+    tempPanel: Number(t.temp_panel) || 0,
+    tempAir: Number(t.temp_air) || 0,
+    humidity: Number(t.humidity) || 0
+  });
+
+  if (appState.realtimeSeries.length > MAX_REALTIME_POINTS) {
+    appState.realtimeSeries.shift();
+  }
+
+  updateRealtimeCharts();
 }
 
 // ----------------------------------------------------------------------------
